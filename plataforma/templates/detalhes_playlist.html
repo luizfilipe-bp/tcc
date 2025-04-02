@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Detalhes da Playlist{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-5">
+    <div class="card mb-4">
+        <div class="card-header">
+            <div>
+                <h1>{{ playlist.nome }}</h1>
+            </div>
+        </div>
+        <div class="card-body">
+            <p><strong>Descrição:</strong> {{ playlist.descricao }}</p>
+            <p><strong>Nível de Dificuldade:</strong> {{ playlist.get_nivel_dificuldade_display }}</p>
+            <p><strong>Categoria:</strong> {{ playlist.categoria }}</p>
+            <p><strong>Autor:</strong> {{ playlist.autor.username }}</p>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h2>Adicionar novo vídeo à playlist</h2>
+        <form method="post" action="{% url 'cadastrar_video' playlist.id %}">
+            {% csrf_token %}
+            {{ formulario.as_p }}
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+    </div>
+
+    <!--
+    
+    -->
+    <div class="container mt-2">
+        <h2>Vídeos da Playlist</h2>
+        {% if playlist_videos %}
+            <div class="playlist-videos">
+                {% for playlist_video in playlist_videos %}
+                    <div class="card mb-3">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-md-2 text-center">
+                                <img src="{{ playlist_video.video.thumbnail }}" alt="Thumbnail do vídeo" style="width: 160px; height: 90px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title font-weight-bold">{{ playlist_video.video.titulo }}</h5>
+                                    <p class="card-text mb-1"><strong>Nível:</strong> {{ playlist_video.get_nivel_dificuldade_display }}</p>
+                                    <p class="card-text"><strong>Canal:</strong> {{ playlist_video.video.canal }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <form method="POST" action="{% url 'excluir_video' id=playlist.id id_video=playlist_video.video.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Não foi encontrada nenhum vídeo para essa playlist.</p>
+        {% endif %}
+    </div>
+       
+
+</div>
+{% endblock %}

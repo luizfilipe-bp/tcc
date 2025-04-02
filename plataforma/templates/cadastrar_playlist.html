@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Adicionar Playlist{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-5">
+    <h1>Adicionar Nova Playlist</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ formulario.as_p }}
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'playlists' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

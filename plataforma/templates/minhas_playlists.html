@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Minhas Playlists{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-5">
+    <h1>Minhas Playlists</h1>
+    <a href="{% url 'cadastrar_playlist' %}" class="btn btn-primary mb-3">Adicionar Nova Playlist</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Nível de Dificuldade</th>
+                <th>Categoria</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for playlist in playlists %}
+            <tr onclick="window.location.href='{% url 'detalhes_playlist' playlist.id %}'" style="cursor: pointer;">
+                <td>{{ playlist.nome }}</td>
+                <td>{{ playlist.descricao }}</td>
+                <td>{{ playlist.get_nivel_dificuldade_display }}</td>
+                <td>{{ playlist.categoria }}</td>
+                <td>
+                    <a href="{% url 'editar_playlist' playlist.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="{% url 'excluir_playlist' playlist.id %}" class="btn btn-sm btn-danger">Deletar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">Nenhuma playlist encontrada.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
