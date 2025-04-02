@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.validators import FileExtensionValidator
 
 DIFICULDADE = [
     ('basico', 'Básico'),
@@ -28,7 +27,8 @@ def save_user_profile(instance, **kwargs):
 
 class Video(models.Model):
     youtube_id = models.CharField(max_length=11, unique=True)
-    thumbnail = models.FileField(upload_to='uploads/videos/thumbnails', blank=True, null=True, validators = [FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg'])])
+    #thumbnail = models.FileField(upload_to='uploads/videos/thumbnails', blank=True, null=True, validators = [FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg'])])
+    thumbnail = models.URLField(max_length=200)
     titulo = models.CharField(max_length=150)
     canal = models.CharField(max_length=150)
     # visivel = models.BooleanField(default=True)
@@ -42,7 +42,6 @@ class Playlist(models.Model):
     nivel_dificuldade = models.CharField(max_length=13, choices=DIFICULDADE, default='basico')
     categoria = models.CharField(max_length=40)
     autor = models.ForeignKey(User, on_delete=models.CASCADE)
-    videos = models.ManyToManyField(Video, blank=True)
 
     def __str__(self):  
         return f"{self.nome} - {self.autor.username}"
@@ -51,7 +50,7 @@ class Playlist(models.Model):
 class PlaylistVideo(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    nivel_dificuldade = models.CharField(max_length=13, choices=DIFICULDADE, default='basico')
+    nivel_dificuldade = models.CharField(max_length=13, choices=DIFICULDADE, default='basico')      # dificuldade do video
     # adicionado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -61,15 +60,13 @@ class PlaylistVideo(models.Model):
         return f"{self.video.titulo} - {self.nivel_dificuldade}"
 
 
-
-
-'''
 class Pergunta(models.Model):
     pergunta = models.CharField(max_length=250)
-    autor = models.ForeignKey(Perfil, on_delete=models.CASCADE)
-    video_pergunta = models.ForeignKey(Video, on_delete=models.CASCADE)
+    autor = models.ForeignKey(User, on_delete=models.CASCADE)
+    video_pergunta = models.ForeignKey(PlaylistVideo, on_delete=models.CASCADE)
     avaliacao_positiva = models.IntegerField(default=0)
     avaliacao_negativa = models.IntegerField(default=0)
+    criado_em = models.DateTimeField(auto_now_add=True)
 
 
 class PerguntaAlternativas(Pergunta):
@@ -83,5 +80,4 @@ class PerguntaAlternativas(Pergunta):
 class PerguntaVerdadeiroFalso(Pergunta):
     resposta = models.BooleanField()
 
-    
-'''
+

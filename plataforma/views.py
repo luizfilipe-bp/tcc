@@ -35,6 +35,7 @@ def minhas_playlists(request):
     playlists_usuario = Playlist.objects.filter(autor=usuario)
     return render(request, 'minhas_playlists.html', {'playlists': playlists_usuario})
 
+
 @login_required(login_url='/auth/login')
 def cadastrar_playlist(request):
     if request.method == 'POST':
@@ -48,6 +49,7 @@ def cadastrar_playlist(request):
         formulario = PlaylistForm()
     return render(request, 'cadastrar_playlist.html', {'formulario': formulario})
 
+
 @login_required(login_url='/auth/login')
 def editar_playlist(request, id):
     playlist = Playlist.objects.get(id=id)
@@ -60,11 +62,13 @@ def editar_playlist(request, id):
     formulario = PlaylistForm(instance=playlist)   
     return render(request, 'editar_playlist.html', {'formulario': formulario}) 
 
+
 @login_required(login_url='/auth/login')
 def excluir_playlist(request, id):
     playlist = Playlist.objects.get(id=id)
     playlist.delete()
     return redirect('playlists')
+
 
 def extrair_id_video(url):
     if not url.startswith(('http://', 'https://')):
@@ -80,6 +84,7 @@ def extrair_id_video(url):
         id_video = parse_result.path[1:]
 
     return id_video
+
 
 def buscar_informacoes_video(id_video):
     url = os.getenv('YOUTUBE_API_URL')
@@ -115,18 +120,16 @@ def cadastrar_video(request, id):
             # Se for um vídeo novo, busca informações na API
             if created:
                 data = buscar_informacoes_video(id_video)
-                if data and data.get("items"):
+                if data:
                     snippet = data["items"][0]["snippet"]
                     
                     print(snippet)
-                    print(snippet.get("tags"))
-                    
+                    # print(snippet.get("tags"))
                     video.youtube_id = id_video
                     video.thumbnail = snippet.get("thumbnails").get("standard").get("url")
                     video.titulo = snippet.get("title")
                     video.canal = snippet.get("channelTitle")
                     video.save()
-
 
             playlist = Playlist.objects.get(id=id)
             if not PlaylistVideo.objects.filter(playlist=playlist, video=video).exists():
