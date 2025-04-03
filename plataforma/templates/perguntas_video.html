@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Perguntas do vídeo{% endblock %}
+
+{% block conteudo %}
+
+<h1>Perguntas do Vídeo: {{ playlistvideo.video.titulo }}</h1>
+
+    <h2>Perguntas de Alternativas</h2>
+    {% if perguntas_alternativas %}
+        <ul>
+        {% for pergunta in perguntas_alternativas %}
+            <li>
+                <strong>{{ pergunta.pergunta }}</strong> (Autor: {{ pergunta.autor }})<br>
+                a) {{ pergunta.alternativa1 }}<br>
+                b) {{ pergunta.alternativa2 }}<br>
+                c) {{ pergunta.alternativa3 }}<br>
+                d) {{ pergunta.alternativa4 }}<br>
+                <em>Alternativa correta:</em> {{ pergunta.alternativa_correta }}<br>
+                <em>Avaliação:</em> +{{ pergunta.avaliacao_positiva }} / -{{ pergunta.avaliacao_negativa }}<br>
+                <em>Criado em:</em> {{ pergunta.criado_em|date:"d/m/Y H:i" }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhuma pergunta de alternativas encontrada para este vídeo.</p>
+    {% endif %}
+
+    <h2>Perguntas de Verdadeiro ou Falso</h2>
+    {% if perguntas_verdadeiro_falso %}
+        <ul>
+        {% for pergunta in perguntas_verdadeiro_falso %}
+            <li>
+                <strong>{{ pergunta.pergunta }}</strong> (Autor: {{ pergunta.autor }})<br>
+                <em>Resposta:</em> {{ pergunta.resposta|yesno:"Verdadeiro,Falso" }}<br>
+                <em>Avaliação:</em> +{{ pergunta.avaliacao_positiva }} / -{{ pergunta.avaliacao_negativa }}<br>
+                <em>Criado em:</em> {{ pergunta.criado_em|date:"d/m/Y H:i" }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhuma pergunta de verdadeiro ou falso encontrada para este vídeo.</p>
+    {% endif %}
+
+    <h2>Adicionar Nova Pergunta</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Campos comuns a ambos os tipos de pergunta -->
+        <p>{{ formulario.tipo_pergunta.label }}: {{ formulario.tipo_pergunta }}</p>
+        <p>{{ formulario.pergunta.label }}: {{ formulario.pergunta }}</p>
+        <p>{{ formulario.autor.label }}: {{ formulario.autor }}</p>
+        
+        <!-- Campos específicos para perguntas de alternativas -->
+        <div id="alternativas" style="display: none;">
+            <p>{{ formulario.alternativa1.label }}: {{ formulario.alternativa1 }}</p>
+            <p>{{ formulario.alternativa2.label }}: {{ formulario.alternativa2 }}</p>
+            <p>{{ formulario.alternativa3.label }}: {{ formulario.alternativa3 }}</p>
+            <p>{{ formulario.alternativa4.label }}: {{ formulario.alternativa4 }}</p>
+            <p>{{ formulario.alternativa_correta.label }}: {{ formulario.alternativa_correta }} {{ form.alternativa_correta.errors }}</p>
+        </div>
+        
+        <!-- Campo específico para perguntas de verdadeiro ou falso -->
+        <div id="verdadeiro_falso" style="display: none;">
+            <p>{{ formulario.resposta.label }}: {{ formulario.resposta }}</p>
+        </div>
+        
+        <button type="submit">Adicionar Pergunta</button>
+    </form>
+
+    <a href="{% url 'detalhes_playlist' playlist_video.playlist.id %}">Voltar</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoPergunta = document.querySelector('[name="tipo_pergunta"]');
+            const alternativasDiv = document.getElementById('alternativas');
+            const verdadeiroFalsoDiv = document.getElementById('verdadeiro_falso');
+
+            function updateForm() {
+                if (tipoPergunta.value === 'alternativas') {
+                    alternativasDiv.style.display = 'block';
+                    verdadeiroFalsoDiv.style.display = 'none';
+                } else if (tipoPergunta.value === 'verdadeiro_falso') {
+                    alternativasDiv.style.display = 'none';
+                    verdadeiroFalsoDiv.style.display = 'block';
+                }
+            }
+
+            tipoPergunta.addEventListener('change', updateForm);
+            updateForm();
+        });
+    </script>
+
+{% endblock %}

@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
-from .forms import PlaylistForm, PlaylistVideoForm
+from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo
+from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 import os
@@ -155,6 +155,27 @@ def excluir_video(request, id, id_video):
 
 def detalhes_playlist(request, id):
     playlist = Playlist.objects.get(id=id)
-    videos = PlaylistVideo.objects.filter(playlist=playlist).select_related('video')
+    playlist_video = PlaylistVideo.objects.filter(playlist=id).select_related('video')
+    videos = [pv.video for pv in playlist_video]
+
     formulario = PlaylistVideoForm()
-    return render(request, 'detalhes_playlist.html', {'playlist': playlist, 'formulario': formulario, 'playlist_videos': videos})
+    return render(request, 'detalhes_playlist.html', {'playlist': playlist, 'formulario': formulario, 'videos': videos})
+
+def cadastrar_pergunta(request, id, id_video):
+    None
+
+def perguntas_video(request, id, id_video):
+    playlist_video = get_object_or_404(PlaylistVideo, playlist=id, video=id_video)
+    perguntas_alternativas = PerguntaAlternativas.objects.filter(video_pergunta=playlist_video)    
+    perguntas_verdadeiro_falso = PerguntaVerdadeiroFalso.objects.filter(video_pergunta=playlist_video)
+    formulario = PerguntaForm()
+
+    return render(request, 'perguntas_video.html', 
+        {        
+            'playlist_video': playlist_video,
+            'formulario': formulario, 
+            'perguntas_alternativas': perguntas_alternativas,
+            'perguntas_verdadeiro_falso': perguntas_verdadeiro_falso,
+        })    
+
+        

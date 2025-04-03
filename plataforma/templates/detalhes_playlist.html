@@ -32,26 +32,24 @@
     -->
     <div class="container mt-2">
         <h2>Vídeos da Playlist</h2>
-        {% if playlist_videos %}
-            <div class="playlist-videos">
-                {% for playlist_video in playlist_videos %}
+        {% if videos %}
+            <div>
+                {% for video in videos %}
                     <div class="card mb-3">
                         <div class="row no-gutters align-items-center">
                             <div class="col-md-2 text-center">
-                                <img src="{{ playlist_video.video.thumbnail }}" alt="Thumbnail do vídeo" style="width: 160px; height: 90px; object-fit: cover;">
+                                <img src="{{ video.thumbnail }}" alt="Thumbnail do vídeo" style="width: 160px; height: 90px; object-fit: cover;">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h5 class="card-title font-weight-bold">{{ playlist_video.video.titulo }}</h5>
-                                    <p class="card-text mb-1"><strong>Nível:</strong> {{ playlist_video.get_nivel_dificuldade_display }}</p>
-                                    <p class="card-text"><strong>Canal:</strong> {{ playlist_video.video.canal }}</p>
+                                    <h5 class="card-title font-weight-bold">{{ video.titulo }}</h5>
+                                    <p class="card-text mb-1"><strong>Nível:</strong> {{ video.get_nivel_dificuldade_display }}</p>
+                                    <p class="card-text"><strong>Canal:</strong> {{ video.canal }}</p>
                                 </div>
                             </div>
-                            <div class="col-md-2 text-center">
-                                <form method="POST" action="{% url 'excluir_video' id=playlist.id id_video=playlist_video.video.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
-                                </form>
+                            <div class="col-md-2">
+                                <a href="{% url 'perguntas_video' id=playlist.id id_video=video.id %}" class="btn btn-sm btn-primary"> Perguntas </a>
+                                <a href="{% url 'excluir_video' id=playlist.id id_video=video.id %}" class="btn btn-sm btn-danger">Excluir vídeo</a>
                             </div>
                         </div>
                     </div>
