@@ -162,9 +162,50 @@ def detalhes_playlist(request, id):
     return render(request, 'detalhes_playlist.html', {'playlist': playlist, 'formulario': formulario, 'videos': videos})
 
 def cadastrar_pergunta(request, id, id_video):
-    None
+    if request.method == 'POST':
+        formulario = PerguntaForm(request.POST)
+        print(formulario.errors)
+        if formulario.is_valid():
+            tipo_pergunta = formulario.cleaned_data['tipo_pergunta']
+            pergunta = formulario.cleaned_data['pergunta']
+            autor = request.user
+            video_pergunta = PlaylistVideo.objects.get(playlist=id, video=id_video)
+            print(tipo_pergunta, pergunta, autor, video_pergunta)
+            if tipo_pergunta == 'alternativas':
+                PerguntaAlternativas.objects.create(
+                    pergunta=pergunta,
+                    autor=autor,
+                    video_pergunta=video_pergunta,
+                    alternativa1=formulario.cleaned_data['alternativa1'],
+                    alternativa2=formulario.cleaned_data['alternativa2'],
+                    alternativa3=formulario.cleaned_data['alternativa3'],
+                    alternativa4=formulario.cleaned_data['alternativa4'],
+                    alternativa_correta=formulario.cleaned_data['alternativa_correta'])
+            elif tipo_pergunta == 'verdadeiro_falso':
+                PerguntaVerdadeiroFalso.objects.create(
+                    pergunta=pergunta,
+                    autor=autor,
+                    video_pergunta=video_pergunta,
+                    resposta=formulario.cleaned_data['resposta']
+                )
+            return redirect('perguntas_video', id, id_video)
+        else:
 
-def perguntas_video(request, id, id_video):
+            playlist_video = get_object_or_404(PlaylistVideo, playlist=id, video=id_video)
+            perguntas_alternativas = PerguntaAlternativas.objects.filter(video_pergunta=playlist_video)    
+            perguntas_verdadeiro_falso = PerguntaVerdadeiroFalso.objects.filter(video_pergunta=playlist_video)
+            return render(request, 'perguntas_video.html', 
+                {        
+                    'playlist_video': playlist_video,
+                    'formulario': formulario, 
+                    'perguntas_alternativas': perguntas_alternativas,
+                    'perguntas_verdadeiro_falso': perguntas_verdadeiro_falso,
+                })   
+
+    return redirect('perguntas_video', id, id_video)
+    
+
+def perguntas_video(request, id, id_video, playlist_video=None):
     playlist_video = get_object_or_404(PlaylistVideo, playlist=id, video=id_video)
     perguntas_alternativas = PerguntaAlternativas.objects.filter(video_pergunta=playlist_video)    
     perguntas_verdadeiro_falso = PerguntaVerdadeiroFalso.objects.filter(video_pergunta=playlist_video)

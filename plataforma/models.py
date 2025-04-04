@@ -68,6 +68,9 @@ class Pergunta(models.Model):
     avaliacao_negativa = models.IntegerField(default=0)
     criado_em = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.pergunta} - {self.autor.username} - {self.video_pergunta.video.titulo}'
+
 
 class PerguntaAlternativas(Pergunta):
     alternativa1 = models.CharField(max_length=100)

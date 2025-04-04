@@ -4,7 +4,7 @@
 
 {% block conteudo %}
 
-<h1>Perguntas do Vídeo: {{ playlistvideo.video.titulo }}</h1>
+<h1>Perguntas do Vídeo: {{ playlist_video.video.titulo }}</h1>
 
     <h2>Perguntas de Alternativas</h2>
     {% if perguntas_alternativas %}
@@ -12,10 +12,10 @@
         {% for pergunta in perguntas_alternativas %}
             <li>
                 <strong>{{ pergunta.pergunta }}</strong> (Autor: {{ pergunta.autor }})<br>
-                a) {{ pergunta.alternativa1 }}<br>
-                b) {{ pergunta.alternativa2 }}<br>
-                c) {{ pergunta.alternativa3 }}<br>
-                d) {{ pergunta.alternativa4 }}<br>
+                1) {{ pergunta.alternativa1 }}<br>
+                2) {{ pergunta.alternativa2 }}<br>
+                3) {{ pergunta.alternativa3 }}<br>
+                4) {{ pergunta.alternativa4 }}<br>
                 <em>Alternativa correta:</em> {{ pergunta.alternativa_correta }}<br>
                 <em>Avaliação:</em> +{{ pergunta.avaliacao_positiva }} / -{{ pergunta.avaliacao_negativa }}<br>
                 <em>Criado em:</em> {{ pergunta.criado_em|date:"d/m/Y H:i" }}
@@ -43,13 +43,18 @@
     {% endif %}
 
     <h2>Adicionar Nova Pergunta</h2>
-    <form method="post">
+    <form action="{% url 'cadastrar_pergunta' id=playlist_video.playlist.id id_video=playlist_video.video.id %}" method="POST">
+        
         {% csrf_token %}
+        {% if formulario.errors %}
+            <div class="alert alert-danger">
+                <strong>Erro:</strong> Todos os campos são obrigatórios
+            </div>
+        {% endif %}
         
         <!-- Campos comuns a ambos os tipos de pergunta -->
         <p>{{ formulario.tipo_pergunta.label }}: {{ formulario.tipo_pergunta }}</p>
         <p>{{ formulario.pergunta.label }}: {{ formulario.pergunta }}</p>
-        <p>{{ formulario.autor.label }}: {{ formulario.autor }}</p>
         
         <!-- Campos específicos para perguntas de alternativas -->
         <div id="alternativas" style="display: none;">
@@ -57,7 +62,7 @@
             <p>{{ formulario.alternativa2.label }}: {{ formulario.alternativa2 }}</p>
             <p>{{ formulario.alternativa3.label }}: {{ formulario.alternativa3 }}</p>
             <p>{{ formulario.alternativa4.label }}: {{ formulario.alternativa4 }}</p>
-            <p>{{ formulario.alternativa_correta.label }}: {{ formulario.alternativa_correta }} {{ form.alternativa_correta.errors }}</p>
+            <p>{{ formulario.alternativa_correta.label }}: {{ formulario.alternativa_correta }}</p>
         </div>
         
         <!-- Campo específico para perguntas de verdadeiro ou falso -->
