@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from dotenv import load_dotenv
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -127,6 +126,14 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # YOUTUBE API
-load_dotenv()
+#load_dotenv()
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 YOUTUBE_API_URL = os.getenv('YOUTUBE_API_URL')
+
+STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'productionfiles'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'staticfiles'
+]

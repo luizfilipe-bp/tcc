@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 import os
 import requests
 
-load_dotenv()
 
 @login_required(login_url='/auth/login')
 def principal(request):
-    return render(request, 'principal.html')
+    playlists = Playlist.objects.all()
+    return render(request, 'principal.html', {'playlists': playlists})
 
 
 @login_required(login_url='/auth/login')
@@ -87,6 +87,7 @@ def extrair_id_video(url):
 
 
 def buscar_informacoes_video(id_video):
+    load_dotenv()
     url = os.getenv('YOUTUBE_API_URL')
     api_key = os.getenv('YOUTUBE_API_KEY')
 

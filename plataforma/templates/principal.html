@@ -1,8 +1,38 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} 
+
+{% load static %}
 
 {% block titulo %}Principal{% endblock %}
 
 {% block conteudo %}
 
-
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Playlists Disponíveis</h1>
+    {% if playlists %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for playlist in playlists %}
+            <div class="col">
+                <div class="card card-hover h-100 shadow-sm" onclick="window.location.href='{% url 'detalhes_playlist' playlist.id %}'">
+                    <div class="card-header">
+                        <h5 class="card-title">{{ playlist.nome }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            {{ playlist.descricao|truncatechars:150 }}
+                        </p>
+                        <p class="mb-1">
+                            <span><strong>Nível:</strong> {{ playlist.get_nivel_dificuldade_display }}</span>
+                            <span class="ms-3"><strong>Categoria:</strong> {{ playlist.categoria }}</span>
+                        </p>
+                        <p class="mb-0 text-muted"><strong>Autor:</strong> {{ playlist.autor.username }}</p>
+                    </div>
+                    
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center">Nenhuma playlist cadastrada ainda.</p>
+    {% endif %}
+</div>
 {% endblock %}
