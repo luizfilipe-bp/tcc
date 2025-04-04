@@ -219,4 +219,13 @@ def perguntas_video(request, id, id_video, playlist_video=None):
             'perguntas_verdadeiro_falso': perguntas_verdadeiro_falso,
         })    
 
+def excluir_pergunta(request, id, id_video, id_pergunta):
+    pergunta = PerguntaAlternativas.objects.filter(id=id_pergunta).first()
+    if pergunta:
+        pergunta.delete()
+    else:
+        pergunta = PerguntaVerdadeiroFalso.objects.get(id=id_pergunta)
+        pergunta.delete()
+    
+    return redirect('perguntas_video', id, id_video)
         
