@@ -156,11 +156,9 @@ def excluir_video(request, id, id_video):
 
 def detalhes_playlist(request, id):
     playlist = Playlist.objects.get(id=id)
-    playlist_video = PlaylistVideo.objects.filter(playlist=id).select_related('video')
-    videos = [pv.video for pv in playlist_video]
-
+    playlist_videos = PlaylistVideo.objects.filter(playlist=id)
     formulario = PlaylistVideoForm()
-    return render(request, 'detalhes_playlist.html', {'playlist': playlist, 'formulario': formulario, 'videos': videos})
+    return render(request, 'detalhes_playlist.html', {'playlist': playlist, 'formulario': formulario, 'playlist_videos': playlist_videos})
 
 def cadastrar_pergunta(request, id, id_video):
     if request.method == 'POST':
@@ -230,3 +228,10 @@ def excluir_pergunta(request, id, id_video, id_pergunta):
     
     return redirect('perguntas_video', id, id_video)
         
+
+def assistir_playlist(request, id):
+    playlist = Playlist.objects.get(id=id)
+    playlist_videos = PlaylistVideo.objects.filter(playlist=id)
+
+    return render(request, 'assistir_playlist.html', {'playlist': playlist, 'playlist_videos': playlist_videos})
+

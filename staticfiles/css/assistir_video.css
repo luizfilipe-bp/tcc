@@ -1,0 +1,12 @@
+.list-group-item .thumbnail {
+    width: 160px;
+    height: 90px;
+    object-fit: cover;
+    
+    flex-shrink: 0; /* Impede que o flex reduza o tamanho da imagem */
+}
+
+.scroll-lista-videos {
+    max-height: 400px;
+    overflow-y: auto;
+}
