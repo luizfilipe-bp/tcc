@@ -12,7 +12,7 @@
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for playlist in playlists %}
             <div class="col">
-                <div class="card card-hover h-100 shadow-sm" onclick="window.location.href='{% url 'assistir_playlist' playlist.id %}'">
+                <div class="card card-hover h-100 shadow-sm" onclick="window.location.href='{% url 'assistir_playlist' id=playlist.id index_video=0%}'">
                     <div class="card-header">
                         <h5 class="card-title">{{ playlist.nome }}</h5>
                     </div>

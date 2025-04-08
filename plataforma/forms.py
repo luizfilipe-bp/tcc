@@ -65,3 +65,31 @@ class PerguntaForm(forms.Form):
                 self.add_error('resposta', 'Este campo é obrigatório para perguntas de verdadeiro ou falso.')
 
         return cleaned_data
+
+
+class FormularioRespostaAlternativa(forms.Form):
+    pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
+    resposta = forms.ChoiceField(
+        widget=forms.RadioSelect,
+        choices=(), 
+        label="Escolha uma alternativa"
+    )
+
+    def __init__(self, *args, **kwargs):
+        alternativas = kwargs.pop('alternativas', [])
+        super().__init__(*args, **kwargs)
+        self.fields['resposta'].choices = [
+            (str(i + 1), alt) for i, alt in enumerate(alternativas)
+        ]
+
+
+class FormularioRespostaVerdadeiroFalso(forms.Form):
+    pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
+    resposta = forms.ChoiceField(
+        widget=forms.RadioSelect,
+        choices=[
+            ('True', 'Verdadeiro'),
+            ('False', 'Falso')
+        ],
+        label="Selecione Verdadeiro ou Falso"
+    )

@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
-from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm
+from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso
+from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso, Pergunta
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
+from django.http import HttpResponseRedirect, JsonResponse
+from django.urls import reverse
+from django.template.loader import render_to_string
 import os
 import requests
 
@@ -227,11 +230,81 @@ def excluir_pergunta(request, id, id_video, id_pergunta):
         pergunta.delete()
     
     return redirect('perguntas_video', id, id_video)
-        
 
-def assistir_playlist(request, id):
-    playlist = Playlist.objects.get(id=id)
-    playlist_videos = PlaylistVideo.objects.filter(playlist=id)
 
-    return render(request, 'assistir_playlist.html', {'playlist': playlist, 'playlist_videos': playlist_videos})
+def get_perguntas_video(request, id, id_playlist_video):
+    playlist_video = get_object_or_404(PlaylistVideo, id=id_playlist_video)
+    print(id_playlist_video)
+    print(playlist_video)
+    perguntas_alternativas = PerguntaAlternativas.objects.filter(video_pergunta=playlist_video)
+    perguntas_vf = PerguntaVerdadeiroFalso.objects.filter(video_pergunta=playlist_video)
 
+    perguntas = []
+    for pergunta in perguntas_alternativas:
+        perguntas.append({
+            'id': pergunta.id,
+            'tipo': 'alternativas',
+            'pergunta': pergunta.pergunta,
+            'alternativas': [pergunta.alternativa1, pergunta.alternativa2, pergunta.alternativa3, pergunta.alternativa4],
+            'alternativa_correta': pergunta.alternativa_correta
+        })
+    for pergunta in perguntas_vf:
+        perguntas.append({
+            'id': pergunta.id,
+            'tipo': 'verdadeiro_falso',
+            'pergunta': pergunta.pergunta,
+            'resposta': pergunta.resposta
+        })
+
+    return JsonResponse({'perguntas': perguntas})
+
+
+def get_formulario_resposta(request, id_pergunta):
+    try:
+        # Tenta obter uma pergunta do tipo alternativas
+        pergunta = PerguntaAlternativas.objects.get(id=id_pergunta)
+        alternativas = [
+            pergunta.alternativa1,
+            pergunta.alternativa2,
+            pergunta.alternativa3,
+            pergunta.alternativa4
+        ]
+        formulario = FormularioRespostaAlternativa(
+            alternativas=alternativas,
+            initial={'pergunta_id': pergunta.id}
+        )
+    except PerguntaAlternativas.DoesNotExist:
+        pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
+        formulario = FormularioRespostaVerdadeiroFalso(
+            initial={'pergunta_id': pergunta.id}
+        )
+
+    formulario_html = formulario.as_p()
+    return JsonResponse({'formulario_html': formulario_html})        
+
+
+def assistir_playlist(request, id, index_video=0):
+    playlist = get_object_or_404(Playlist, id=id)
+    playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
+
+    if playlist_videos.exists():
+        video_atual = playlist_videos.first()
+
+    context = {
+        'playlist': playlist,
+        'playlist_videos': playlist_videos,
+        'video_atual': video_atual
+    }
+
+    return render(request, 'assistir_playlist.html', context)
+
+
+def checar_resposta(request):
+    print(request)
+    print("logica de checagem de resposta")
+    if request.method == 'POST':
+        pergunta_id = request.POST.get('pergunta_id')
+        resposta = request.POST.get('resposta')
+        # Apenas verificando o envio da resposta, sem validacao ainda
+        return JsonResponse({'status': 'success', 'mensagem': 'Resposta recebida'})
+    return JsonResponse({'status': 'error', 'mensagem': 'Método inválido'}) 
