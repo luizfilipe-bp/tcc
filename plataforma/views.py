@@ -2,12 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
 from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso, Pergunta
+from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse
-from django.template.loader import render_to_string
+from django.http import JsonResponse
 import os
 import requests
 
@@ -259,10 +257,9 @@ def get_perguntas_video(request, id, id_playlist_video):
     return JsonResponse({'perguntas': perguntas})
 
 
-def get_formulario_resposta(request, id_pergunta):
-    try:
-        # Tenta obter uma pergunta do tipo alternativas
-        pergunta = PerguntaAlternativas.objects.get(id=id_pergunta)
+def get_formulario_resposta(request, id_pergunta):    
+    pergunta = PerguntaAlternativas.objects.filter(id=id_pergunta).first()
+    if pergunta:
         alternativas = [
             pergunta.alternativa1,
             pergunta.alternativa2,
@@ -273,7 +270,7 @@ def get_formulario_resposta(request, id_pergunta):
             alternativas=alternativas,
             initial={'pergunta_id': pergunta.id}
         )
-    except PerguntaAlternativas.DoesNotExist:
+    else:
         pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
         formulario = FormularioRespostaVerdadeiroFalso(
             initial={'pergunta_id': pergunta.id}
@@ -283,28 +280,56 @@ def get_formulario_resposta(request, id_pergunta):
     return JsonResponse({'formulario_html': formulario_html})        
 
 
+def finalizou_playlist(request, id):
+    playlist = get_object_or_404(Playlist, id=id)
+    return render(request, 'finalizou_playlist.html', {'playlist': playlist})
+     
+
 def assistir_playlist(request, id, index_video=0):
     playlist = get_object_or_404(Playlist, id=id)
     playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
-
+    video_atual = None
     if playlist_videos.exists():
-        video_atual = playlist_videos.first()
+        if 0 <= index_video and  not (index_video > len(playlist_videos) - 1):
+            video_atual = playlist_videos[index_video]
+            context = {
+                'playlist': playlist,
+                'playlist_videos': playlist_videos,
+                'video_atual': video_atual,
+                'index_video': index_video,
+            }
+            return render(request, 'assistir_playlist.html', context)
+        else:
+            return redirect('finalizou_playlist', id)
 
-    context = {
-        'playlist': playlist,
-        'playlist_videos': playlist_videos,
-        'video_atual': video_atual
-    }
 
-    return render(request, 'assistir_playlist.html', context)
+
+
 
 
 def checar_resposta(request):
-    print(request)
-    print("logica de checagem de resposta")
-    if request.method == 'POST':
-        pergunta_id = request.POST.get('pergunta_id')
-        resposta = request.POST.get('resposta')
-        # Apenas verificando o envio da resposta, sem validacao ainda
-        return JsonResponse({'status': 'success', 'mensagem': 'Resposta recebida'})
-    return JsonResponse({'status': 'error', 'mensagem': 'Método inválido'}) 
+    pergunta_id = request.POST.get('pergunta_id')
+    resposta = request.POST.get('resposta')
+
+
+    pergunta = PerguntaAlternativas.objects.filter(id=pergunta_id).first()
+    if pergunta:
+        resposta_correta = str(pergunta.alternativa_correta)
+        alternativas = [
+            pergunta.alternativa1,
+            pergunta.alternativa2,
+            pergunta.alternativa3,
+            pergunta.alternativa4
+        ]
+        texto_resposta_correta = alternativas[int(resposta_correta) - 1]
+    else:
+        pergunta = PerguntaVerdadeiroFalso.objects.filter(id=pergunta_id).first()
+        resposta_correta = str(pergunta.resposta)
+        texto_resposta_correta = 'Verdadeiro' if pergunta.resposta else 'Falso'
+
+    acertou = (resposta == resposta_correta)
+    return JsonResponse({
+        'acertou': acertou,
+        'resposta_correta': texto_resposta_correta,
+        'mensagem': 'Você acertou!' if acertou else 'Você errou.'
+    })

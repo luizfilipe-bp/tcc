@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% load static %}
 
 {% block titulo %}
@@ -14,53 +13,113 @@
 <div class="container-sm">
     <h1 class="mt-2 mb-2">{{ playlist.nome }}</h1>
     <div class="row">
-        <div class="col-md-4 card">
-            <h3 class="mb-2 card-header">Próximos vídeos</h3>
-            <div class="scroll-lista-videos">
-                <ul class="list-group list-group-flush">
-                    {% for pv in playlist_videos %}
-                        <li class="list-group-item d-flex align-items-center">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ pv.video.thumbnail }}" class="thumbnail me-2">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Próximos Vídeos</h5>
+                </div>
+                <div class="card-body p-0 scroll-lista-videos">
+                    <ul class="list-group list-group-flush">
+                        {% for pv in playlist_videos %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <img src="{{ pv.video.thumbnail }}" class="thumbnail me-3">
                                 <div>
-                                    <span>{{ pv.video.titulo }}</span>
+                                    <span class="fw-bold">{{ pv.video.titulo }}</span>
                                     <div>
-                                        <span><strong>Nível:</strong> {{ pv.nivel_dificuldade }}</span>
+                                        <small class="text-muted"><strong>Nível:</strong> {{ pv.nivel_dificuldade }}</small>
                                     </div>
                                 </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
-
+        
         <div class="col-md-8">
             {% if video_atual %}
-                <iframe width="100%" height="460" src="https://www.youtube.com/embed/{{ video_atual.video.youtube_id }}" frameborder="0"></iframe>
-            {% else %}
-                <p>Nenhum vídeo disponível na playlist.</p>
-            {% endif %}
-        </div>
+                <div id="player"></div>
+                {% else %}
+                <div class="alert alert-danger">
+                    <p>Nenhum vídeo disponível na playlist.</p>
+                </div>
+                {% endif %}
+            </div>
 
-        <div class="row mt-4">
+        <div id="mensagem-info" class="row alert alert-info mt-3">
+            As perguntas aparecerão ao final do vídeo.
+        </div>
+            
+        <div class="row mt-4" id="perguntas-section" style="display: none;">
             <h3>Perguntas do vídeo: {{ video_atual.video.titulo }}</h3>
             <div id="perguntas-container"></div>
         </div>
     </div>
 </div>
 
+<template id="template-pergunta">
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <strong class="pergunta-texto"></strong>
+        </div>
+        <div class="card-body">
+            <form class="form-pergunta">
+                <div class="form-container"></div>
+                <button type="submit" class="btn btn-primary">Enviar Resposta</button>
+            </form>
+        </div>
+    </div>
+</template>
+
+<template id="template-feedback">
+    <div id="feedback" class="alert">
+        <p class="feedback-message"></p>
+        <p>Resposta correta: <strong class="feedback-correct"></strong></p>
+        <button id="proxima-pergunta" class="btn btn-secondary">Próxima Questão</button>
+    </div>
+</template>
+
+<template id="template-proximo-video">
+    <div class="text-center mt-4">
+        <h4>Parabéns! Você completou todas as perguntas.</h4>
+        <a href="{% url 'assistir_playlist' id=playlist.id index_video=index_video|add:1 %}" class="btn btn-success mt-3">Próximo Vídeo</a>
+    </div>    
+</template>
+
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    let player;
     let currentIndex = 0;
-    const video_atual_id = {{ video_atual.id|default:"0" }};
+    const video_atual_id = {{ video_atual.id }};
     const playlist_id = {{ playlist.id|default:"0" }};
     let perguntas = [];
 
-    // Carrega a lista de perguntas (dados básicos da pergunta)
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            height: '460',
+            width: '100%',
+            videoId: '{{ video_atual.video.youtube_id }}',
+            events: {
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.ENDED) {
+            document.getElementById('mensagem-info').style.display = 'none';  // Oculta a mensagem
+            document.getElementById('perguntas-section').style.display = 'block';  // Exibe as perguntas
+            carregarPerguntas();
+        }
+    }
+
     async function carregarPerguntas() {
         try {
-            const response = await fetch(`http://localhost:8000/playlists/${playlist_id}/assistir/get_perguntas_video/${video_atual_id}`);
+            const response = await fetch(`/playlists/${playlist_id}/assistir/get_perguntas_video/${video_atual_id}`);
             const data = await response.json();
             perguntas = data.perguntas;
 
@@ -74,31 +133,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Renderiza a pergunta atual com o formulário gerado pelo Django Forms
     async function exibirPergunta(index) {
         const pergunta = perguntas[index];
         try {
-            // Chama o endpoint que gera o HTML do formulário para a pergunta atual
             const response = await fetch(`/get_formulario_resposta/${pergunta.id}`);
             const data = await response.json();
-            
-            document.getElementById('perguntas-container').innerHTML = `
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <strong>Pergunta: ${ pergunta.tipo === 'alternativas' ? 'Alternativas' : 'Verdadeiro ou Falso' }</strong>
-                    </div>
-                    <div class="card-body">
-                        <p>${pergunta.pergunta}</p>
-                        <form id="form-pergunta">
-                            ${data.formulario_html}
-                            <button type="submit" class="btn btn-primary">Enviar Resposta</button>
-                        </form>
-                    </div>
-                </div>
-            `;
 
-            // Associa o envio do formulário via JavaScript
-            const form = document.getElementById('form-pergunta');
+            const template = document.getElementById('template-pergunta');
+            const clone = template.content.cloneNode(true);
+
+            clone.querySelector('.pergunta-texto').textContent = pergunta.pergunta;
+            const formContainer = clone.querySelector('.form-container');
+            formContainer.innerHTML = data.formulario_html;
+
+            const container = document.getElementById('perguntas-container');
+            container.innerHTML = '';
+            container.appendChild(clone);
+
+            const form = document.querySelector('.form-pergunta');
             if (form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -110,10 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Envia a resposta do formulário para o backend via AJAX
     async function enviarResposta() {
         try {
-            const form = document.getElementById('form-pergunta');
+            const form = document.querySelector('.form-pergunta');
             const formData = new FormData(form);
 
             const response = await fetch('/checar_resposta', {
@@ -123,25 +174,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRFToken': '{{ csrf_token }}'
                 }
             });
-
             const data = await response.json();
 
-            if (data.status === 'success') {
+            const templateFeedback = document.getElementById('template-feedback');
+            const feedbackClone = templateFeedback.content.cloneNode(true);
+            const feedbackEl = feedbackClone.querySelector('#feedback');
+
+            if (data.acertou) {
+                feedbackEl.classList.add('alert-success');
+            } else {
+                feedbackEl.classList.add('alert-danger');
+            }
+
+            feedbackEl.querySelector('.feedback-message').textContent = data.mensagem;
+            feedbackEl.querySelector('.feedback-correct').textContent = data.resposta_correta;
+
+            const feedbackContainerAnterior = document.getElementById('feedback');
+            if (feedbackContainerAnterior) {
+                feedbackContainerAnterior.remove();
+            }
+            document.getElementById('perguntas-container').insertAdjacentElement('afterend', feedbackEl);
+            feedbackEl.scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('proxima-pergunta').addEventListener('click', () => {
+                feedbackEl.remove();
                 currentIndex++;
                 if (currentIndex < perguntas.length) {
                     exibirPergunta(currentIndex);
                 } else {
-                    document.getElementById('perguntas-container').innerHTML = '<p>Todas as perguntas foram respondidas.</p>';
+                    const container = document.getElementById('perguntas-container');
+                    container.innerHTML = '';
+                    const templateProximoVideo = document.getElementById('template-proximo-video');
+                    const proximoVideoClone = templateProximoVideo.content.cloneNode(true);
+                    container.appendChild(proximoVideoClone);
                 }
-            } else {
-                alert('Erro ao enviar resposta: ' + data.mensagem);
-            }
+            });
         } catch (error) {
             console.error('Erro ao enviar resposta:', error);
         }
     }
-
-    carregarPerguntas();
-});
 </script>
 {% endblock %}
