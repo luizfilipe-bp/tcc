@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.validators import FileExtensionValidator
 
 DIFICULDADE = [
     ('basico', 'Básico'),
@@ -12,6 +13,8 @@ DIFICULDADE = [
 
 class Perfil(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    xp = models.IntegerField(default=0)
+    energia = models.IntegerField(default=4)
 
 
 @receiver(post_save, sender=User)
@@ -84,3 +87,33 @@ class PerguntaVerdadeiroFalso(Pergunta):
     resposta = models.BooleanField()
 
 
+class ProgressoVideo(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    playlist_video = models.ForeignKey(PlaylistVideo, on_delete=models.CASCADE)
+    video_completo = models.BooleanField(default=False)  
+    perguntas_respondidas = models.BooleanField(default=False)
+    data_conclusao = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('usuario', 'playlist_video')
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.playlist_video.video.titulo}"
+
+
+class TipoConquista(models.Model):
+    nome = models.CharField(max_length=50)
+    descricao = models.CharField(max_length=250)
+    imagem = models.FileField(upload_to='img/conquistas', blank=True, null=True, validators = [FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg'])])
+    xp = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.nome
+    
+class Conquista(models.Model):
+    tipo = models.ForeignKey(TipoConquista, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    data_conquista = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.tipo.nome} - {self.usuario.username}"

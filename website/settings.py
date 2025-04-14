@@ -133,7 +133,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # YOUTUBE API
-#load_dotenv()
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 YOUTUBE_API_URL = os.getenv('YOUTUBE_API_URL')
 
@@ -144,3 +143,6 @@ STATIC_ROOT = BASE_DIR / 'productionfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'staticfiles'
 ]
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
