@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Perfil, Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso
+from .models import Perfil, Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo
 
 class PerfilAdmin(admin.ModelAdmin):
     list_display = (['usuario'])
@@ -19,9 +19,13 @@ class PerguntaAlternativasAdmin(admin.ModelAdmin):
 class PerguntaVerdadeiroFalsoAdmin(admin.ModelAdmin):
     list_display = ('pergunta', 'resposta')
 
+class ProgressoVideoAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'playlist_video', 'video_completo', 'perguntas_respondidas')
+
 admin.site.register(Perfil, PerfilAdmin)
 admin.site.register(Playlist, PlaylistAdmin)
 admin.site.register(Video, VideoAdmin)
 admin.site.register(PlaylistVideo, PlaylistVideoAdmin)
 admin.site.register(PerguntaAlternativas, PerguntaAlternativasAdmin)
 admin.site.register(PerguntaVerdadeiroFalso, PerguntaVerdadeiroFalsoAdmin)
+admin.site.register(ProgressoVideo, ProgressoVideoAdmin)

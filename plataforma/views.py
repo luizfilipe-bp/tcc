@@ -1,13 +1,16 @@
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
 from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso
+from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 from django.http import JsonResponse
 import os
 import requests
+from django.views.decorators.http import require_POST
+
 
 
 @login_required(login_url='/auth/login')
@@ -333,3 +336,24 @@ def checar_resposta(request):
         'resposta_correta': texto_resposta_correta,
         'mensagem': 'Você acertou!' if acertou else 'Você errou.'
     })
+
+@require_POST
+def marcar_video_assistido(request, id_video):
+    video = get_object_or_404(PlaylistVideo, id=id_video)
+    progresso, created = ProgressoVideo.objects.get_or_create(usuario=request.user, playlist_video=video)
+    if created:
+        progresso.video_completo = True
+    else:
+        progresso.data_conclusao = timezone.now()
+    progresso.save()
+    return JsonResponse({"completo": progresso.video_completo})
+
+
+@require_POST
+def marcar_perguntas_concluidas(request, id_video):
+    video = get_object_or_404(PlaylistVideo, id=id_video)
+    progresso = ProgressoVideo.objects.get(usuario=request.user, playlist_video=video)
+    progresso.perguntas_respondidas = True
+    progresso.save()
+    print(progresso)
+    return JsonResponse({"perguntas_respondidas": progresso.perguntas_respondidas})

@@ -18,4 +18,6 @@ urlpatterns = [
     path('playlists/<int:id>/assistir/finalizou_playlist', views.finalizou_playlist, name='finalizou_playlist'),
     path('checar_resposta', views.checar_resposta, name='checar_resposta'),
     path('get_formulario_resposta/<int:id_pergunta>', views.get_formulario_resposta, name='get_formulario_resposta'),
+    path('marcar_video_assistido/<int:id_video>', views.marcar_video_assistido, name='marcar_video_assistido'),
+    path('marcar_perguntas_concluidas/<int:id_video>', views.marcar_perguntas_concluidas, name='marcar_perguntas_concluidas'),
 ]

@@ -103,6 +103,10 @@
             height: '460',
             width: '100%',
             videoId: '{{ video_atual.video.youtube_id }}',
+            playerVars: {
+                rel: 0,
+                modestbranding: 1,
+            },
             events: {
                 'onStateChange': onPlayerStateChange
             }
@@ -113,8 +117,25 @@
         if (event.data == YT.PlayerState.ENDED) {
             document.getElementById('mensagem-info').style.display = 'none';  // Oculta a mensagem
             document.getElementById('perguntas-section').style.display = 'block';  // Exibe as perguntas
+            await marcarVideoAssistido();
             carregarPerguntas();
         }
+    }
+
+    async function marcarVideoAssistido() {
+        fetch(`/marcar_video_assistido/${video_atual_id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Vídeo marcado como assistido:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao marcar vídeo como assistido:', error);
+        });
     }
 
     async function carregarPerguntas() {
@@ -207,11 +228,28 @@
                     const templateProximoVideo = document.getElementById('template-proximo-video');
                     const proximoVideoClone = templateProximoVideo.content.cloneNode(true);
                     container.appendChild(proximoVideoClone);
+                    await marcarPerguntasConcluidas();
                 }
             });
         } catch (error) {
             console.error('Erro ao enviar resposta:', error);
         }
+    }
+
+    async function marcarPerguntasConcluidas(){
+        fetch(`/marcar_perguntas_concluidas/${video_atual_id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Pergunta marcado como assistido:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao marcar Pergunta como assistido:', error);
+        });
     }
 </script>
 {% endblock %}
