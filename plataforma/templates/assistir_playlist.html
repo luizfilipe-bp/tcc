@@ -117,7 +117,7 @@
         if (event.data == YT.PlayerState.ENDED) {
             document.getElementById('mensagem-info').style.display = 'none';  // Oculta a mensagem
             document.getElementById('perguntas-section').style.display = 'block';  // Exibe as perguntas
-            await marcarVideoAssistido();
+            marcarVideoAssistido();
             carregarPerguntas();
         }
     }
@@ -228,7 +228,7 @@
                     const templateProximoVideo = document.getElementById('template-proximo-video');
                     const proximoVideoClone = templateProximoVideo.content.cloneNode(true);
                     container.appendChild(proximoVideoClone);
-                    await marcarPerguntasConcluidas();
+                    marcarPerguntasConcluidas();
                 }
             });
         } catch (error) {

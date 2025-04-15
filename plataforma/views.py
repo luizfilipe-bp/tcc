@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
 from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo
+from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 from django.http import JsonResponse
@@ -305,11 +305,6 @@ def assistir_playlist(request, id, index_video=0):
         else:
             return redirect('finalizou_playlist', id)
 
-
-
-
-
-
 def checar_resposta(request):
     pergunta_id = request.POST.get('pergunta_id')
     resposta = request.POST.get('resposta')
@@ -331,6 +326,7 @@ def checar_resposta(request):
         texto_resposta_correta = 'Verdadeiro' if pergunta.resposta else 'Falso'
 
     acertou = (resposta == resposta_correta)
+    marcar_pergunta_respondida(request.user, pergunta_id, acertou)
     return JsonResponse({
         'acertou': acertou,
         'resposta_correta': texto_resposta_correta,
@@ -349,11 +345,63 @@ def marcar_video_assistido(request, id_video):
     return JsonResponse({"completo": progresso.video_completo})
 
 
+def verificarConquistaPerguntasRespondidas(usuario):
+    CONQUISTAS_RESPOSTAS = {
+        1: "Primeira Resposta",
+        5: "Respondedor Ávido",
+        10: "Especialista nas Respostas",
+    }
+
+    perfil = usuario.perfil
+    perfil.perguntas_respondidas += 1
+    perfil.save()
+    
+    nome_conquista = CONQUISTAS_RESPOSTAS.get(perfil.perguntas_respondidas)
+    if nome_conquista:
+        registrar_conquista(usuario, nome_conquista)
+
+
+def registrar_conquista(usuario, nome_conquista):
+    tipo = TipoConquista.objects.get(nome=nome_conquista)
+    if not Conquista.objects.filter(tipo=tipo, usuario=usuario).exists():
+        Conquista.objects.create(tipo=tipo, usuario=usuario)
+        adicionar_xp_perfil(usuario.perfil, tipo.xp)
+        
+
 @require_POST
 def marcar_perguntas_concluidas(request, id_video):
     video = get_object_or_404(PlaylistVideo, id=id_video)
     progresso = ProgressoVideo.objects.get(usuario=request.user, playlist_video=video)
-    progresso.perguntas_respondidas = True
+    progresso.perguntas_respondidas = True    
     progresso.save()
+    xp = 20
+    adicionar_xp_perfil(request.user.perfil, xp)
     print(progresso)
     return JsonResponse({"perguntas_respondidas": progresso.perguntas_respondidas})
+
+
+def marcar_pergunta_respondida(usuario, pergunta_id, acertou):
+    pergunta = get_object_or_404(Pergunta, id=pergunta_id)
+    progresso, created = ProgressoPergunta.objects.get_or_create(usuario=usuario, pergunta=pergunta)
+
+    if created:
+        progresso.respondida = True
+        progresso.data_respondida = timezone.now()
+        progresso.resposta_correta = acertou
+        progresso.save()
+        if acertou:
+            adicionar_xp_perfil(usuario.perfil, 10)
+            verificarConquistaPerguntasRespondidas(usuario)
+    else:
+        if not progresso.resposta_correta and acertou:
+            progresso.data_respondida = timezone.now()
+            progresso.resposta_correta = acertou
+            progresso.save()
+            
+            adicionar_xp_perfil(usuario.perfil, 10)
+            verificarConquistaPerguntasRespondidas(usuario)
+
+
+def adicionar_xp_perfil(perfil, xp):
+    perfil.xp += xp
+    perfil.save()

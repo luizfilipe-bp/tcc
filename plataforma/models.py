@@ -15,6 +15,13 @@ class Perfil(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     xp = models.IntegerField(default=0)
     energia = models.IntegerField(default=4)
+    cursos_concluidos = models.IntegerField(default=0)
+    cursos_criados = models.IntegerField(default=0)
+    perguntas_criadas = models.IntegerField(default=0)
+    perguntas_respondidas = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.usuario.username}'
 
 
 @receiver(post_save, sender=User)
@@ -101,6 +108,20 @@ class ProgressoVideo(models.Model):
         return f"{self.usuario.username} - {self.playlist_video.video.titulo}"
 
 
+class ProgressoPergunta(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    pergunta = models.ForeignKey(Pergunta, on_delete=models.CASCADE)
+    respondida = models.BooleanField(default=False)
+    resposta_correta = models.BooleanField(default=False)
+    data_respondida = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('usuario', 'pergunta')
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.pergunta.pergunta[:50]}"
+
+
 class TipoConquista(models.Model):
     nome = models.CharField(max_length=50)
     descricao = models.CharField(max_length=250)
@@ -110,6 +131,7 @@ class TipoConquista(models.Model):
     def __str__(self):
         return self.nome
     
+
 class Conquista(models.Model):
     tipo = models.ForeignKey(TipoConquista, on_delete=models.CASCADE)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
