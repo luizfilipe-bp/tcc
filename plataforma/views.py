@@ -20,20 +20,6 @@ def principal(request):
 
 
 @login_required(login_url='/auth/login')
-def cadastrar_playlist(request):
-    if request.method == 'POST':
-        formulario = PlaylistForm(request.POST)
-        if formulario.is_valid():
-            playlist = formulario.save(commit=False)
-            playlist.autor = User.objects.get(usuario=request.user)
-            playlist.save() 
-            return redirect('principal')  
-    else:
-        formulario = PlaylistForm()  
-        return render(request, 'cadastrar_playlist.html', {'formulario': formulario})
-
-
-@login_required(login_url='/auth/login')
 def minhas_playlists(request):
     usuario = request.user
     playlists_usuario = Playlist.objects.filter(autor=usuario)
@@ -48,6 +34,9 @@ def cadastrar_playlist(request):
             playlist = formulario.save(commit=False)
             playlist.autor = request.user
             playlist.save()
+
+            verificarConquistaCursosCriados(request.user)
+
             return redirect('playlists')
     else:
         formulario = PlaylistForm()
@@ -191,6 +180,8 @@ def cadastrar_pergunta(request, id, id_video):
                     video_pergunta=video_pergunta,
                     resposta=formulario.cleaned_data['resposta']
                 )
+
+            verificarConquistaPerguntasCriadas(request.user)
             return redirect('perguntas_video', id, id_video)
         else:
 
@@ -361,6 +352,51 @@ def verificarConquistaPerguntasRespondidas(usuario):
         registrar_conquista(usuario, nome_conquista)
 
 
+def verificarConquistaCursosCriados(usuario):
+    CONQUISTAS_CURSOS = {
+        1: "Instrutor Inovador",
+        3: "Instrutor Nato"
+    }
+
+    perfil = usuario.perfil
+    perfil.cursos_criados += 1
+    perfil.save()
+
+    nome_conquista = CONQUISTAS_CURSOS.get(perfil.cursos_criados)
+    if nome_conquista:
+        registrar_conquista(usuario, nome_conquista)
+
+
+def verificarConquistaCursosConcluidos(usuario):
+    CONQUISTAS_CURSOS_CLUIDOS = {
+        1: "Iniciante Curioso",
+        2: "Estudioso Dedicado"
+    }
+
+    perfil = usuario.perfil
+    perfil.cursos_concluidos += 1
+    perfil.save()
+
+    nome_conquista = CONQUISTAS_CURSOS_CLUIDOS.get(perfil.cursos_concluidos)
+    if nome_conquista:
+        registrar_conquista(usuario, nome_conquista)
+
+
+def verificarConquistaPerguntasCriadas(usuario):
+    CONQUISTAS_PERGUNTAS_CRIADAS = {
+        1: "Curioso",
+        5: "Investigador Ágil",
+    }
+
+    perfil = usuario.perfil
+    perfil.perguntas_criadas += 1
+    perfil.save()
+
+    nome_conquista = CONQUISTAS_PERGUNTAS_CRIADAS.get(perfil.perguntas_criadas)
+    if nome_conquista:
+        registrar_conquista(usuario, nome_conquista)
+
+        
 def registrar_conquista(usuario, nome_conquista):
     tipo = TipoConquista.objects.get(nome=nome_conquista)
     if not Conquista.objects.filter(tipo=tipo, usuario=usuario).exists():
@@ -376,7 +412,7 @@ def marcar_perguntas_concluidas(request, id_video):
     progresso.save()
     xp = 20
     adicionar_xp_perfil(request.user.perfil, xp)
-    print(progresso)
+    verificarConquistaCursosConcluidos(request.user)
     return JsonResponse({"perguntas_respondidas": progresso.perguntas_respondidas})
 
 
