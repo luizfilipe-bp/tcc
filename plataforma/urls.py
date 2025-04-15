@@ -16,6 +16,9 @@ urlpatterns = [
     path('playlists/<int:id>/assistir/<int:index_video>', views.assistir_playlist, name='assistir_playlist'),
     path('playlists/<int:id>/assistir/get_perguntas_video/<int:id_playlist_video>', views.get_perguntas_video, name='get_perguntas_video'),
     path('playlists/<int:id>/assistir/finalizou_playlist', views.finalizou_playlist, name='finalizou_playlist'),
+
+    path('perfil', views.perfil, name='perfil'),
+
     path('checar_resposta', views.checar_resposta, name='checar_resposta'),
     path('get_formulario_resposta/<int:id_pergunta>', views.get_formulario_resposta, name='get_formulario_resposta'),
     path('marcar_video_assistido/<int:id_video>', views.marcar_video_assistido, name='marcar_video_assistido'),

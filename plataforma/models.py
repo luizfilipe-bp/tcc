@@ -13,6 +13,7 @@ DIFICULDADE = [
 
 class Perfil(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    foto_perfil = models.FileField(upload_to='img/perfil', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg'])], default='img/perfil/default.png')
     xp = models.IntegerField(default=0)
     energia = models.IntegerField(default=4)
     cursos_concluidos = models.IntegerField(default=0)

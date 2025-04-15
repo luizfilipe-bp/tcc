@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+{% endblock %}
+
+{% block titulo %}Meu Perfil{% endblock %}
+
+{% block conteudo %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4 class="mb-0">{{ perfil.usuario.username }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="ratio ratio-4x3 mb-3">
+                        <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded" alt="{{ perfil.usuario.username }}" style="object-fit: cover; width: 100%; height: 100%;">
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>XP:</strong> {{ perfil.xp }}</li>
+                        <li class="list-group-item"><strong>Energia:</strong> {{ perfil.energia }}</li>
+                        <li class="list-group-item"><strong>Cursos Concluídos:</strong> {{ perfil.cursos_concluidos }}</li>
+                        <li class="list-group-item"><strong>Cursos Criados:</strong> {{ perfil.cursos_criados }}</li>
+                        <li class="list-group-item"><strong>Perguntas Criadas:</strong> {{ perfil.perguntas_criadas }}</li>
+                        <li class="list-group-item"><strong>Perguntas Respondidas:</strong> {{ perfil.perguntas_respondidas }}</li>
+                        <li class="list-group-item"><strong>Quantidade de Conquistas:</strong> {{ conquistas.count }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Minhas Conquistas</h4>
+                </div>
+                <div class="card-body scroll-conquistas">
+                    {% if conquistas %}
+                        <div class="row">
+                            {% for conquista in conquistas %}
+                                <div class="col-sm-6 col-lg-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">{{ conquista.tipo.nome }}</h5>
+                                            {% if conquista.tipo.imagem %}
+                                                <img src="{{ conquista.tipo.imagem.url }}" class="card-img-top" alt="{{ conquista.tipo.nome }}">
+                                            {% endif %}
+                                            <p class="card-text">{{ conquista.tipo.descricao }}</p>
+                                            <small class="text-muted">XP: {{ conquista.tipo.xp }}</small>
+                                            <p class="card-text">
+                                                <small class="text-muted">Conquistado em: {{ conquista.data_conquista|date:"d M Y" }}</small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center">Você ainda não possui conquistas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

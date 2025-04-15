@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
 from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista
+from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista, Perfil
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 from django.http import JsonResponse
@@ -17,6 +17,17 @@ from django.views.decorators.http import require_POST
 def principal(request):
     playlists = Playlist.objects.all()
     return render(request, 'principal.html', {'playlists': playlists})
+
+@login_required(login_url='/auth/login')
+def perfil(request):
+    perfil = get_object_or_404(Perfil, usuario=request.user)
+    conquistas = Conquista.objects.filter(usuario=request.user).order_by('-data_conquista')
+    
+    context = {
+        'perfil': perfil,
+        'conquistas': conquistas
+    }
+    return render(request, 'perfil.html', context)
 
 
 @login_required(login_url='/auth/login')
@@ -408,11 +419,12 @@ def registrar_conquista(usuario, nome_conquista):
 def marcar_perguntas_concluidas(request, id_video):
     video = get_object_or_404(PlaylistVideo, id=id_video)
     progresso = ProgressoVideo.objects.get(usuario=request.user, playlist_video=video)
-    progresso.perguntas_respondidas = True    
-    progresso.save()
+    if not progresso.perguntas_respondidas:
+        progresso.perguntas_respondidas = True
+        verificarConquistaCursosConcluidos(request.user)    
+        progresso.save()
     xp = 20
     adicionar_xp_perfil(request.user.perfil, xp)
-    verificarConquistaCursosConcluidos(request.user)
     return JsonResponse({"perguntas_respondidas": progresso.perguntas_respondidas})
 
 
