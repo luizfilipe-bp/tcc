@@ -78,6 +78,7 @@ class Pergunta(models.Model):
     avaliacao_positiva = models.IntegerField(default=0)
     avaliacao_negativa = models.IntegerField(default=0)
     criado_em = models.DateTimeField(auto_now_add=True)
+    nivel_dificuldade = models.CharField(max_length=13, choices=DIFICULDADE, default='basico')
 
     def __str__(self):
         return f'{self.pergunta} - {self.autor.username} - {self.video_pergunta.video.titulo}'
@@ -113,7 +114,7 @@ class ProgressoPergunta(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     pergunta = models.ForeignKey(Pergunta, on_delete=models.CASCADE)
     respondida = models.BooleanField(default=False)
-    resposta_correta = models.BooleanField(default=False)
+    acertou = models.BooleanField(default=False)
     data_respondida = models.DateTimeField(null=True, blank=True)
 
     class Meta:

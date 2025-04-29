@@ -39,6 +39,7 @@ class PerguntaForm(forms.Form):
     alternativa2 = forms.CharField(max_length=100, required=False, label="Alternativa 2")
     alternativa3 = forms.CharField(max_length=100, required=False, label="Alternativa 3")
     alternativa4 = forms.CharField(max_length=100, required=False, label="Alternativa 4")
+    nivel_dificuldade = forms.ChoiceField(choices=DIFICULDADE, label="Nível de Dificuldade")
     alternativa_correta = forms.IntegerField(
         required=False,
         label="Alternativa Correta (1 a 4)",

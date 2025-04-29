@@ -307,33 +307,78 @@ def assistir_playlist(request, id, index_video=0):
         else:
             return redirect('finalizou_playlist', id)
 
-def checar_resposta(request):
-    pergunta_id = request.POST.get('pergunta_id')
-    resposta = request.POST.get('resposta')
-
-
-    pergunta = PerguntaAlternativas.objects.filter(id=pergunta_id).first()
-    if pergunta:
-        resposta_correta = str(pergunta.alternativa_correta)
-        alternativas = [
+def obter_pergunta_e_resposta_correta(pergunta_id):
+    try:
+        pergunta = PerguntaAlternativas.objects.get(id=pergunta_id)
+        indice = int(pergunta.alternativa_correta) - 1
+        texto_alternativa_correta = [
             pergunta.alternativa1,
             pergunta.alternativa2,
             pergunta.alternativa3,
-            pergunta.alternativa4
-        ]
-        texto_resposta_correta = alternativas[int(resposta_correta) - 1]
-    else:
-        pergunta = PerguntaVerdadeiroFalso.objects.filter(id=pergunta_id).first()
-        resposta_correta = str(pergunta.resposta)
-        texto_resposta_correta = 'Verdadeiro' if pergunta.resposta else 'Falso'
+            pergunta.alternativa4,
+        ][indice]
+        alternativa_correta = str(pergunta.alternativa_correta)
+    except PerguntaAlternativas.DoesNotExist:
+        pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=pergunta_id)
+        alternativa_correta = 'True' if pergunta.resposta else 'False'
+        texto_alternativa_correta = 'Verdadeiro' if pergunta.resposta else 'Falso'
+    return pergunta, alternativa_correta, texto_alternativa_correta
 
-    acertou = (resposta == resposta_correta)
-    marcar_pergunta_respondida(request.user, pergunta_id, acertou)
+def checar_resposta(request):
+    XP_POR_NIVEL = {
+        'basico': 10,
+        'intermediario': 20,
+        'avancado': 30,
+    }   
+    pergunta_id = request.POST.get('pergunta_id')
+    resposta_cliente = request.POST.get('resposta')
+
+    pergunta, alternativa_correta, texto_alternativa_correta = obter_pergunta_e_resposta_correta(pergunta_id)
+
+    acertou = (resposta_cliente == alternativa_correta)
+
+    novo_acerto = marcar_pergunta_respondida(request.user, pergunta, acertou)
+
+    if novo_acerto:
+        xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade, 0)
+        adicionar_xp_perfil(request.user.perfil, xp)
+        verificarConquistaPerguntasRespondidas(request.user)
+
     return JsonResponse({
         'acertou': acertou,
-        'resposta_correta': texto_resposta_correta,
+        'resposta_correta': texto_alternativa_correta,
+        'xp': XP_POR_NIVEL.get(pergunta.nivel_dificuldade, 0),
         'mensagem': 'Você acertou!' if acertou else 'Você errou.'
     })
+
+def marcar_pergunta_respondida(usuario, pergunta, acertou):
+    progresso, criado = ProgressoPergunta.objects.get_or_create(
+        usuario=usuario,
+        pergunta=pergunta,
+        defaults={
+            'respondida': True,
+            'data_respondida': timezone.now(),
+            'resposta_correta': acertou,
+        }
+    )
+
+    novo_acerto = False
+    if not criado and not progresso.acertou and acertou:
+        progresso.acertou = True
+        progresso.data_respondida = timezone.now()
+        progresso.save(update_fields=['resposta_correta', 'data_respondida'])
+        novo_acerto = True
+
+    if criado and acertou:
+        novo_acerto = True
+
+    return novo_acerto
+
+
+def adicionar_xp_perfil(perfil, xp):
+    perfil.xp += xp
+    perfil.save()
+
 
 @require_POST
 def marcar_video_assistido(request, id_video):
@@ -415,41 +460,3 @@ def registrar_conquista(usuario, nome_conquista):
         adicionar_xp_perfil(usuario.perfil, tipo.xp)
         
 
-@require_POST
-def marcar_perguntas_concluidas(request, id_video):
-    video = get_object_or_404(PlaylistVideo, id=id_video)
-    progresso = ProgressoVideo.objects.get(usuario=request.user, playlist_video=video)
-    if not progresso.perguntas_respondidas:
-        progresso.perguntas_respondidas = True
-        verificarConquistaCursosConcluidos(request.user)    
-        progresso.save()
-    xp = 20
-    adicionar_xp_perfil(request.user.perfil, xp)
-    return JsonResponse({"perguntas_respondidas": progresso.perguntas_respondidas})
-
-
-def marcar_pergunta_respondida(usuario, pergunta_id, acertou):
-    pergunta = get_object_or_404(Pergunta, id=pergunta_id)
-    progresso, created = ProgressoPergunta.objects.get_or_create(usuario=usuario, pergunta=pergunta)
-
-    if created:
-        progresso.respondida = True
-        progresso.data_respondida = timezone.now()
-        progresso.resposta_correta = acertou
-        progresso.save()
-        if acertou:
-            adicionar_xp_perfil(usuario.perfil, 10)
-            verificarConquistaPerguntasRespondidas(usuario)
-    else:
-        if not progresso.resposta_correta and acertou:
-            progresso.data_respondida = timezone.now()
-            progresso.resposta_correta = acertou
-            progresso.save()
-            
-            adicionar_xp_perfil(usuario.perfil, 10)
-            verificarConquistaPerguntasRespondidas(usuario)
-
-
-def adicionar_xp_perfil(perfil, xp):
-    perfil.xp += xp
-    perfil.save()

@@ -187,7 +187,7 @@
         try {
             const form = document.querySelector('.form-pergunta');
             const formData = new FormData(form);
-
+  
             const response = await fetch('/checar_resposta', {
                 method: 'POST',
                 body: formData,
@@ -196,27 +196,32 @@
                 }
             });
             const data = await response.json();
-
+  
             const templateFeedback = document.getElementById('template-feedback');
             const feedbackClone = templateFeedback.content.cloneNode(true);
             const feedbackEl = feedbackClone.querySelector('#feedback');
-
+  
             if (data.acertou) {
                 feedbackEl.classList.add('alert-success');
             } else {
                 feedbackEl.classList.add('alert-danger');
             }
-
-            feedbackEl.querySelector('.feedback-message').textContent = data.mensagem;
-            feedbackEl.querySelector('.feedback-correct').textContent = data.resposta_correta;
-
-            const feedbackContainerAnterior = document.getElementById('feedback');
-            if (feedbackContainerAnterior) {
-                feedbackContainerAnterior.remove();
+  
+            if (data.acertou) {
+                feedbackEl.querySelector('.feedback-message').textContent =
+                    `Parabéns! Você ganhou ${data.xp} XP!`;
+            } else {
+                feedbackEl.querySelector('.feedback-message').textContent = data.mensagem;
             }
-            document.getElementById('perguntas-container').insertAdjacentElement('afterend', feedbackEl);
+  
+            feedbackEl.querySelector('.feedback-correct').textContent = data.resposta_correta;
+  
+            const antigo = document.getElementById('feedback');
+            if (antigo) antigo.remove();
+            document.getElementById('perguntas-container')
+                    .insertAdjacentElement('afterend', feedbackEl);
             feedbackEl.scrollIntoView({ behavior: 'smooth' });
-
+  
             document.getElementById('proxima-pergunta').addEventListener('click', () => {
                 feedbackEl.remove();
                 currentIndex++;
@@ -225,31 +230,13 @@
                 } else {
                     const container = document.getElementById('perguntas-container');
                     container.innerHTML = '';
-                    const templateProximoVideo = document.getElementById('template-proximo-video');
-                    const proximoVideoClone = templateProximoVideo.content.cloneNode(true);
-                    container.appendChild(proximoVideoClone);
-                    marcarPerguntasConcluidas();
+                    const tpl = document.getElementById('template-proximo-video');
+                    container.appendChild(tpl.content.cloneNode(true));
                 }
             });
         } catch (error) {
             console.error('Erro ao enviar resposta:', error);
         }
-    }
-
-    async function marcarPerguntasConcluidas(){
-        fetch(`/marcar_perguntas_concluidas/${video_atual_id}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Pergunta marcado como assistido:', data);
-        })
-        .catch(error => {
-            console.error('Erro ao marcar Pergunta como assistido:', error);
-        });
     }
 </script>
 {% endblock %}
