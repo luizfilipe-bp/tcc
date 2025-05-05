@@ -307,6 +307,12 @@ def assistir_playlist(request, id, index_video=0):
         else:
             return redirect('finalizou_playlist', id)
 
+def retirar_vida(perfil):
+    if perfil.vida > 0:
+        perfil.vida -= 1
+        perfil.save()
+
+
 def obter_pergunta_e_resposta_correta(pergunta_id):
     try:
         pergunta = PerguntaAlternativas.objects.get(id=pergunta_id)
@@ -336,18 +342,20 @@ def checar_resposta(request):
     pergunta, alternativa_correta, texto_alternativa_correta = obter_pergunta_e_resposta_correta(pergunta_id)
 
     acertou = (resposta_cliente == alternativa_correta)
-
-    novo_acerto = marcar_pergunta_respondida(request.user, pergunta, acertou)
-
-    if novo_acerto:
-        xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade, 0)
-        adicionar_xp_perfil(request.user.perfil, xp)
-        verificarConquistaPerguntasRespondidas(request.user)
+    if acertou:
+        novo_acerto = marcar_pergunta_respondida(request.user, pergunta, acertou)
+        if novo_acerto:
+            xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade)
+            adicionar_xp_perfil(request.user.perfil, xp)
+            verificarConquistaPerguntasRespondidas(request.user)
+    else:
+        xp = 0
+        retirar_vida(request.user.perfil)
 
     return JsonResponse({
         'acertou': acertou,
         'resposta_correta': texto_alternativa_correta,
-        'xp': XP_POR_NIVEL.get(pergunta.nivel_dificuldade, 0),
+        'xp': XP_POR_NIVEL.get(pergunta.nivel_dificuldade),
         'mensagem': 'Você acertou!' if acertou else 'Você errou.'
     })
 
