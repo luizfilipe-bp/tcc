@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 @login_required(login_url='/auth/login')
 def principal(request):
     playlists = Playlist.objects.all()
+    playlists = playlists.filter(playlistvideo__isnull=False).distinct()
     return render(request, 'principal.html', {'playlists': playlists})
 
 @login_required(login_url='/auth/login')
@@ -287,7 +288,13 @@ def get_formulario_resposta(request, id_pergunta):
 
 def finalizou_playlist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
-    return render(request, 'finalizou_playlist.html', {'playlist': playlist})
+    xp = 100
+    adicionar_xp_perfil(request.user.perfil, xp)
+    context = {
+        'playlist': playlist,
+        'xp': xp,
+    }
+    return render(request, 'finalizou_playlist.html', context)
      
 
 def assistir_playlist(request, id, index_video=0):
@@ -295,23 +302,38 @@ def assistir_playlist(request, id, index_video=0):
     playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
     video_atual = None
     if playlist_videos.exists():
-        if 0 <= index_video and  not (index_video > len(playlist_videos) - 1):
+        if 0 <= index_video and not (index_video > len(playlist_videos) - 1):
             video_atual = playlist_videos[index_video]
             context = {
                 'playlist': playlist,
                 'playlist_videos': playlist_videos,
                 'video_atual': video_atual,
                 'index_video': index_video,
+                'perfil': request.user.perfil,
             }
             return render(request, 'assistir_playlist.html', context)
         else:
             return redirect('finalizou_playlist', id)
 
-def retirar_vida(perfil):
+
+@login_required(login_url="/auth/login")
+@require_POST
+def retirar_vida(request):
+    perfil = request.user.perfil
+    
     if perfil.vida > 0:
         perfil.vida -= 1
         perfil.save()
+        status = 'sucesso'
+        vidas = perfil.vida
+    else:
+        status = 'erro'
+        vidas = 0
 
+    return JsonResponse({
+        'status': status,
+        'vidas': vidas,
+    })
 
 def obter_pergunta_e_resposta_correta(pergunta_id):
     try:
@@ -348,9 +370,6 @@ def checar_resposta(request):
             xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade)
             adicionar_xp_perfil(request.user.perfil, xp)
             verificarConquistaPerguntasRespondidas(request.user)
-    else:
-        xp = 0
-        retirar_vida(request.user.perfil)
 
     return JsonResponse({
         'acertou': acertou,

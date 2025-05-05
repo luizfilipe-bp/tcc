@@ -5,19 +5,22 @@
 
 {% block conteudo %}
 <div class="container my-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="alert alert-success text-center" role="alert">
-        <h4 class="alert-heading">Parabéns, {{ usuario }}!</h4>
-        <p>
-          Você completou todos os vídeos da playlist <strong>{{ playlist.nome }}</strong>.
-        </p>
-        <hr>
-        <p class="mb-0">
-          Continue explorando outras playlists para expandir ainda mais seu conhecimento.
-        </p>
-      </div>
-    </div>
-  </div>
+	<div class="row justify-content-center">
+    	<div class="col-md-8">
+     		<div class="alert alert-success text-center" role="alert">
+        		<h1 class="alert-heading">Parabéns, {{request.user.username}}!</h1>
+        		<h4>
+          			Completou todos os vídeos da playlist <strong>{{ playlist.nome }}</strong>.
+        		</h4>
+				<h5>
+					Você recebeu {{ xp }} de , XP por sua conquista!
+				</h5>
+        		<hr>
+        		<p class="mb-0">
+         			Continue explorando outras playlists para expandir ainda mais seu conhecimento.
+        		</p>
+      		</div>
+    	</div>
+  	</div>
 </div>
 {% endblock %}

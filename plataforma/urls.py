@@ -22,4 +22,6 @@ urlpatterns = [
     path('checar_resposta', views.checar_resposta, name='checar_resposta'),
     path('get_formulario_resposta/<int:id_pergunta>', views.get_formulario_resposta, name='get_formulario_resposta'),
     path('marcar_video_assistido/<int:id_video>', views.marcar_video_assistido, name='marcar_video_assistido'),
+
+    path('retirar_vida', views.retirar_vida, name='retirar_vida'),
 ]

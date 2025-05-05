@@ -95,7 +95,8 @@
     let player;
     let currentIndex = 0;
     const video_atual_id = {{ video_atual.id }};
-    const playlist_id = {{ playlist.id|default:"0" }};
+    const playlist_id = {{ playlist.id}};
+    let vidas = {{ perfil.vida }};
     let perguntas = [];
 
     function onYouTubeIframeAPIReady() {
@@ -122,6 +123,22 @@
         }
     }
 
+    const retirarVida = async () => {
+        const response = await fetch(`/retirar_vida`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status == 'sucesso'){
+                vidas = data.vidas;
+                console.log('vidas atualizadas:', vidas);
+            }
+        })
+
+    }
     async function marcarVideoAssistido() {
         fetch(`/marcar_video_assistido/${video_atual_id}`, {
             method: 'POST',
@@ -157,27 +174,38 @@
     async function exibirPergunta(index) {
         const pergunta = perguntas[index];
         try {
-            const response = await fetch(`/get_formulario_resposta/${pergunta.id}`);
-            const data = await response.json();
+            if(vidas != 0){
+                const response = await fetch(`/get_formulario_resposta/${pergunta.id}`);
+                const data = await response.json();
 
-            const template = document.getElementById('template-pergunta');
-            const clone = template.content.cloneNode(true);
+                const template = document.getElementById('template-pergunta');
+                const clone = template.content.cloneNode(true);
 
-            clone.querySelector('.pergunta-texto').textContent = pergunta.pergunta;
-            const formContainer = clone.querySelector('.form-container');
-            formContainer.innerHTML = data.formulario_html;
+                clone.querySelector('.pergunta-texto').textContent = pergunta.pergunta;
+                const formContainer = clone.querySelector('.form-container');
+                formContainer.innerHTML = data.formulario_html;
 
-            const container = document.getElementById('perguntas-container');
-            container.innerHTML = '';
-            container.appendChild(clone);
+                const container = document.getElementById('perguntas-container');
+                container.innerHTML = '';
+                container.appendChild(clone);
 
-            const form = document.querySelector('.form-pergunta');
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    await enviarResposta();
-                });
+                const form = document.querySelector('.form-pergunta');
+                if (form) {
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        await enviarResposta();
+                    });
+                }
+            }else{
+                const feedbackEl = document.createElement('div');
+                feedbackEl.classList.add('alert', 'alert-danger');
+                feedbackEl.textContent = 'Você não tem vidas suficientes para responder a pergunta.';
+                const container = document.getElementById('perguntas-container');
+                container.innerHTML = '';
+                container.appendChild(feedbackEl);
+                feedbackEl.scrollIntoView({ behavior: 'smooth' });
             }
+            
         } catch (error) {
             console.error('Erro ao carregar o formulário da pergunta:', error);
         }
@@ -200,18 +228,15 @@
             const templateFeedback = document.getElementById('template-feedback');
             const feedbackClone = templateFeedback.content.cloneNode(true);
             const feedbackEl = feedbackClone.querySelector('#feedback');
-  
+            
             if (data.acertou) {
                 feedbackEl.classList.add('alert-success');
-            } else {
-                feedbackEl.classList.add('alert-danger');
-            }
-  
-            if (data.acertou) {
                 feedbackEl.querySelector('.feedback-message').textContent =
-                    `Parabéns! Você ganhou ${data.xp} XP!`;
+                `Parabéns! Você ganhou ${data.xp} XP!`;
             } else {
+                feedbackEl.classList.add('alert-danger'); 
                 feedbackEl.querySelector('.feedback-message').textContent = data.mensagem;
+                vida = retirarVida();
             }
   
             feedbackEl.querySelector('.feedback-correct').textContent = data.resposta_correta;
