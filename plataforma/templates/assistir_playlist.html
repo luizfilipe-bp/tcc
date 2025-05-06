@@ -37,14 +37,8 @@
         </div>
         
         <div class="col-md-8">
-            {% if video_atual %}
-                <div id="player"></div>
-                {% else %}
-                <div class="alert alert-danger">
-                    <p>Nenhum vídeo disponível na playlist.</p>
-                </div>
-                {% endif %}
-            </div>
+            <div id="player"></div>
+        </div>
 
         <div id="mensagem-info" class="row alert alert-info mt-3">
             As perguntas aparecerão ao final do vídeo.
@@ -123,6 +117,13 @@
         }
     }
 
+    function atualizarElementoVidas() {
+        const vidasElement = document.getElementById('quantidade-vidas');
+        if (vidasElement) {
+            vidasElement.textContent = vidas;
+        }
+    }
+
     const retirarVida = async () => {
         const response = await fetch(`/retirar_vida`, {
             method: 'POST',
@@ -134,10 +135,9 @@
         .then(data => {
             if(data.status == 'sucesso'){
                 vidas = data.vidas;
-                console.log('vidas atualizadas:', vidas);
+                atualizarElementoVidas();
             }
         })
-
     }
     async function marcarVideoAssistido() {
         fetch(`/marcar_video_assistido/${video_atual_id}`, {
@@ -180,8 +180,8 @@
 
                 const template = document.getElementById('template-pergunta');
                 const clone = template.content.cloneNode(true);
+                clone.querySelector('.pergunta-texto').textContent = `${pergunta.nivel_dificuldade}: ${pergunta.pergunta}`;
 
-                clone.querySelector('.pergunta-texto').textContent = pergunta.pergunta;
                 const formContainer = clone.querySelector('.form-container');
                 formContainer.innerHTML = data.formulario_html;
 
@@ -215,6 +215,8 @@
         try {
             const form = document.querySelector('.form-pergunta');
             const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;  
   
             const response = await fetch('/checar_resposta', {
                 method: 'POST',

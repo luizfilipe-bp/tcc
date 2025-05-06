@@ -6,12 +6,12 @@
 
 {% block conteudo %}
 
-<div class="container mt-5">
+<div class="container-fluid mt-3">
     <h1 class="mb-4 text-center">Playlists Disponíveis</h1>
     {% if playlists %}
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for playlist in playlists %}
-            <div class="col">
+            <div class="col mb-4">
                 <div class="card card-hover h-100 shadow-sm" onclick="window.location.href='{% url 'assistir_playlist' id=playlist.id index_video=0%}'">
                     <div class="card-header">
                         <h5 class="card-title">{{ playlist.nome }}</h5>

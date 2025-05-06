@@ -7,19 +7,19 @@
         <title>{% block titulo %}{% endblock %}</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <link rel="stylesheet" href="{% static 'mystyles.css' %}">
+        <link rel="stylesheet" href="{% static '/css/mystyles.css' %}">
 
         {% block style %}
         {% endblock %}
 
     </head>
-    <body>
+    <body class="noto-sans">
         <header>
             <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
                 <div class="container">
                     <a class="navbar-brand d-flex align-items-center" href="/">
-                        <i class="fas fa-book me-2"></i>
-                        <span>Portal Biblioteca</span>
+                        <img src="/media/img/icons/knowledge-graph.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
+                        <span>SABER</span>
                     </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
@@ -28,12 +28,9 @@
                     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                         <ul class="navbar-nav">
                             {% if user.is_authenticated %}
-                                <li class="nav-item d-flex align-items-center">
+                                <li class="nav-item d-flex align-items-center me-2">
                                     <i class="fas fa-heart text-danger me-1"></i>
-                                    <p class="mb-0">{{ user.perfil.vida }}</p>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link active" aria-current="page" href="/"><i class="fas fa-home"></i> Principal</a>
+                                    <p id="quantidade-vidas" class="mb-0">{{ user.perfil.vida }}</p>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link active" href="/perfil"><i class="fas fa-user"></i> Perfil</a>
@@ -42,7 +39,7 @@
                                     <a class="nav-link active" href="/playlists"><i class="fas fa-book"></i> Minhas Playlists</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                    <a class="nav-link active" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
                                 </li>
                             {% else %}
                                 <li class="nav-item">
@@ -57,10 +54,11 @@
                 </div>
             </nav>
         </header>
-        
-        {% block conteudo %}
-        {% endblock %}
 
+        <main>
+            {% block conteudo %}
+            {% endblock %}
+        </main>
         <!--
         <footer class="text-white text-center p-3 mt-5">
             <p>&copy; Portal Biblioteca. Todos os direitos reservados.</p>

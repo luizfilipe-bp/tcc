@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+.noto-sans {
+    font-family: "Noto Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+
+html, body {
+    background-color: whitesmoke;
+}
+
+.card-hover {
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+.card-hover:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+#quantidade-vidas{
+    font-size: 18px;
+    color: red;   
+}

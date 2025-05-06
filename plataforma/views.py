@@ -248,6 +248,7 @@ def get_perguntas_video(request, id, id_playlist_video):
         perguntas.append({
             'id': pergunta.id,
             'tipo': 'alternativas',
+            'nivel_dificuldade': pergunta.get_nivel_dificuldade_display(),
             'pergunta': pergunta.pergunta,
             'alternativas': [pergunta.alternativa1, pergunta.alternativa2, pergunta.alternativa3, pergunta.alternativa4],
             'alternativa_correta': pergunta.alternativa_correta
@@ -256,6 +257,7 @@ def get_perguntas_video(request, id, id_playlist_video):
         perguntas.append({
             'id': pergunta.id,
             'tipo': 'verdadeiro_falso',
+            'nivel_dificuldade': pergunta.get_nivel_dificuldade_display(),
             'pergunta': pergunta.pergunta,
             'resposta': pergunta.resposta
         })
