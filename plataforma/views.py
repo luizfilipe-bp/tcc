@@ -338,7 +338,7 @@ def retirar_vida(request):
         'vidas': vidas,
     })
 
-def obter_pergunta_e_resposta_correta(pergunta_id):
+def obter_pergunta_e_resposta_correta(pergunta_id): 
     try:
         pergunta = PerguntaAlternativas.objects.get(id=pergunta_id)
         indice = int(pergunta.alternativa_correta) - 1
@@ -376,7 +376,7 @@ def checar_resposta(request):
 
     return JsonResponse({
         'acertou': acertou,
-        'resposta_correta': texto_alternativa_correta,
+        'texto_alternativa_correta': texto_alternativa_correta,
         'xp': XP_POR_NIVEL.get(pergunta.nivel_dificuldade),
         'mensagem': 'Você acertou!' if acertou else 'Você errou.'
     })
@@ -388,7 +388,7 @@ def marcar_pergunta_respondida(usuario, pergunta, acertou):
         defaults={
             'respondida': True,
             'data_respondida': timezone.now(),
-            'resposta_correta': acertou,
+            'acertou': acertou,
         }
     )
 
@@ -396,7 +396,7 @@ def marcar_pergunta_respondida(usuario, pergunta, acertou):
     if not criado and not progresso.acertou and acertou:
         progresso.acertou = True
         progresso.data_respondida = timezone.now()
-        progresso.save(update_fields=['resposta_correta', 'data_respondida'])
+        progresso.save(update_fields=['acertou', 'data_respondida'])
         novo_acerto = True
 
     if criado and acertou:
