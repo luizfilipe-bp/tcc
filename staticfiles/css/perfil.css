@@ -2,3 +2,28 @@
     max-height: 78vh;
     overflow-y: auto;
 }
+
+.reputacao-indicador {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circulo-progresso {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(#4caf50 var(--progresso), #e0e0e0 0%);
+}
+
+.reputacao-valor {
+    position: relative;
+    z-index: 1;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+  

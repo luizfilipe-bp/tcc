@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block style %}
-    <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+    <link rel="stylesheet" href="{% static '/css/perfil.css' %}">
 {% endblock %}
 
 {% block titulo %}Meu Perfil{% endblock %}
@@ -20,13 +20,24 @@
                         <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded" alt="{{ perfil.usuario.username }}" style="object-fit: cover; width: 100%; height: 100%;">
                     </div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>XP:</strong> {{ perfil.xp }}</li>
-                        <li class="list-group-item"><strong>Vidas:</strong> {{ perfil.vida }}</li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>XP:</strong> {{ perfil.xp }}</span>
+                            <span><strong>Vidas:</strong> {{ perfil.vida }}</span>
+                        </li>
                         <li class="list-group-item"><strong>Cursos Concluídos:</strong> {{ perfil.cursos_concluidos }}</li>
                         <li class="list-group-item"><strong>Cursos Criados:</strong> {{ perfil.cursos_criados }}</li>
                         <li class="list-group-item"><strong>Perguntas Criadas:</strong> {{ perfil.perguntas_criadas }}</li>
                         <li class="list-group-item"><strong>Perguntas Respondidas:</strong> {{ perfil.perguntas_respondidas }}</li>
                         <li class="list-group-item"><strong>Quantidade de Conquistas:</strong> {{ conquistas.count }}</li>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-around align-items-center">
+                                <strong>Reputação:</strong>
+                                <div class="reputacao-indicador">
+                                    <div class="circulo-progresso" style="--progresso: {{ reputacao }}%;"></div>
+                                    <span class="reputacao-valor">{{ reputacao }}%</span>
+                                </div>
+                            </div>    
+                        </li>
                     </ul>
                 </div>
             </div>

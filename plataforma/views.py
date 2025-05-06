@@ -10,7 +10,7 @@ from django.http import JsonResponse
 import os
 import requests
 from django.views.decorators.http import require_POST
-
+from django.db.models import Sum
 
 
 @login_required(login_url='/auth/login')
@@ -23,10 +23,11 @@ def principal(request):
 def perfil(request):
     perfil = get_object_or_404(Perfil, usuario=request.user)
     conquistas = Conquista.objects.filter(usuario=request.user).order_by('-data_conquista')
-    
+    reputacao = get_reputacao(request)
     context = {
         'perfil': perfil,
-        'conquistas': conquistas
+        'conquistas': conquistas,
+        'reputacao': reputacao
     }
     return render(request, 'perfil.html', context)
 
@@ -489,3 +490,17 @@ def registrar_conquista(usuario, nome_conquista):
         adicionar_xp_perfil(usuario.perfil, tipo.xp)
         
 
+def get_reputacao(request):
+    usuario = request.user
+    perguntas = Pergunta.objects.filter(autor=usuario)
+
+    somatorio_avaliacao_positiva = perguntas.aggregate(Sum('avaliacao_positiva'))['avaliacao_positiva__sum'] or 0
+    somatorio_avaliacao_negativa = perguntas.aggregate(Sum('avaliacao_negativa'))['avaliacao_negativa__sum'] or 0
+    total = somatorio_avaliacao_positiva + somatorio_avaliacao_negativa
+
+    if total == 0:
+        reputacao = 0
+    else:
+        reputacao = (somatorio_avaliacao_positiva / total) * 100
+    
+    return int(reputacao)
