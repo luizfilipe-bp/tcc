@@ -19,19 +19,32 @@
                     <h5 class="mb-0">Próximos Vídeos</h5>
                 </div>
                 <div class="card-body p-0 scroll-lista-videos">
-                    <ul class="list-group list-group-flush">
-                        {% for pv in playlist_videos %}
-                            <li class="list-group-item d-flex align-items-center">
-                                <img src="{{ pv.video.thumbnail }}" class="thumbnail me-3">
-                                <div>
-                                    <span class="fw-bold">{{ pv.video.titulo }}</span>
-                                    <div>
-                                        <small class="text-muted"><strong>Nível:</strong> {{ pv.nivel_dificuldade }}</small>
-                                    </div>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+					<ul class="list-group list-group-flush">
+						{% for pv in playlist_videos %}
+							{% if pv.id in videos_liberados %}
+								<a href="{% url 'assistir_playlist' id=playlist.id index_video=forloop.counter0 %}"
+									class="list-group-item list-group-item-action d-flex align-items-center">
+									<img src="{{ pv.video.thumbnail }}" class="thumbnail me-3">
+									<div>
+										<span class="fw-bold">{{ pv.video.titulo }}</span>
+										<div>
+											<small class="text-muted"><strong>Nível:</strong> {{ pv.nivel_dificuldade }}</small>
+										</div>
+									</div>
+								</a>
+							{% else %}
+								<li class="list-group-item d-flex align-items-center disabled">
+									<img src="{{ pv.video.thumbnail }}" class="thumbnail me-3 opacity-50">
+									<div class="opacity-50">
+										<span class="fw-bold">{{ pv.video.titulo }}</span>
+										<div>
+											<small class="text-muted"><strong>Nível:</strong> {{ pv.nivel_dificuldade }}</small>
+										</div>
+									</div>
+								</li>
+							{% endif %}
+						{% endfor %}
+					</ul>										 
                 </div>
             </div>
         </div>
@@ -76,7 +89,11 @@
 <template id="template-proximo-video">
     <div class="text-center mt-4">
         <h4>Parabéns! Você completou todas as perguntas.</h4>
-        <a href="{% url 'assistir_playlist' id=playlist.id index_video=index_video|add:1 %}" class="btn btn-success mt-3">Próximo Vídeo</a>
+        {% if index_video|add:1 >= playlist_videos|length %}
+            <a href="{% url 'finalizar_playlist' playlist.id %}" class="btn btn-success mt-3">Finalizar Playlist</a>
+        {% else %}
+            <a href="{% url 'assistir_playlist' id=playlist.id index_video=index_video|add:1 %}" class="btn btn-success mt-3">Próximo Vídeo</a>
+        {% endif %}
     </div>    
 </template>
 
@@ -211,6 +228,22 @@
         }
     }
 
+    async function marcarTodasPerguntasRespondidas(){
+        fetch(`/marcar_todas_perguntas_respondidas/${video_atual_id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Todas perguntas do vídeo marcadas como assistido:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao marcar Pergunta como assistido:', error);
+        });
+    }
+
     async function enviarResposta() {
         try {
             const form = document.querySelector('.form-pergunta');
@@ -259,6 +292,7 @@
                     container.innerHTML = '';
                     const tpl = document.getElementById('template-proximo-video');
                     container.appendChild(tpl.content.cloneNode(true));
+                    marcarTodasPerguntasRespondidas();
                 }
             });
         } catch (error) {

@@ -124,6 +124,16 @@ class ProgressoPergunta(models.Model):
         return f"{self.usuario.username} - {self.pergunta.pergunta[:50]}"
 
 
+class ProgressoPlaylist(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    playlist_completa = models.BooleanField(default=False)
+    data_conclusao = models.DateTimeField()
+
+    class Meta:
+        unique_together = ('usuario', 'playlist')
+
+
 class TipoConquista(models.Model):
     nome = models.CharField(max_length=50)
     descricao = models.CharField(max_length=250)

@@ -3,8 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
 from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
 from django.contrib.auth.decorators import login_required
-from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista, Perfil
-from django.contrib.auth.models import User
+from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista, Perfil, ProgressoPlaylist
 from dotenv import load_dotenv
 from django.http import JsonResponse
 import os
@@ -289,34 +288,71 @@ def get_formulario_resposta(request, id_pergunta):
     return JsonResponse({'formulario_html': formulario_html})        
 
 
-def finalizou_playlist(request, id):
+def get_progresso_playlist(usuario, playlist_videos):
+    progresso_videos = ProgressoVideo.objects.filter(usuario=usuario, playlist_video__in=playlist_videos)
+
+    somatorio_videos_completos = progresso_videos.filter(video_completo=True, perguntas_respondidas=True).count()
+    total = playlist_videos.count()
+
+    if total == 0:
+        return 0
+    porcentagem_progresso = (somatorio_videos_completos / total) * 100
+    print(f"Somatório: {somatorio_videos_completos}, Total: {total}")
+    return int(porcentagem_progresso)
+
+
+def finalizar_playlist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
-    xp = 100
-    adicionar_xp_perfil(request.user.perfil, xp)
+    playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
+    
+    progresso_playlist = get_progresso_playlist(request.user, playlist_videos)
+    if progresso_playlist == 100:
+        xp = 0
+        if not ProgressoPlaylist.objects.filter(usuario=request.user, playlist=playlist).exists():
+            xp = 200
+            progresso_playlist = ProgressoPlaylist.objects.create(usuario=request.user, playlist=playlist, playlist_completa=True, data_conclusao=timezone.now())
+            progresso_playlist.save()
+            verificarConquistaCursosConcluidos(request.user)
+            adicionar_xp_perfil(request.user.perfil, xp)
+    else:
+        return redirect('assistir_playlist', id=id, index_video=0)
+    
     context = {
         'playlist': playlist,
         'xp': xp,
     }
-    return render(request, 'finalizou_playlist.html', context)
-     
+    return render(request, 'finalizar_playlist.html', context)
 
+def get_videos_liberados(playlist_videos, usuario):     
+    progresso_videos = ProgressoVideo.objects.filter(
+        usuario=usuario,
+        playlist_video__in=playlist_videos
+    )
+    videos_liberados = {p.playlist_video_id for p in progresso_videos}
+    return videos_liberados
+
+
+@login_required
 def assistir_playlist(request, id, index_video=0):
     playlist = get_object_or_404(Playlist, id=id)
-    playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
-    video_atual = None
-    if playlist_videos.exists():
-        if 0 <= index_video and not (index_video > len(playlist_videos) - 1):
-            video_atual = playlist_videos[index_video]
-            context = {
-                'playlist': playlist,
-                'playlist_videos': playlist_videos,
-                'video_atual': video_atual,
-                'index_video': index_video,
-                'perfil': request.user.perfil,
-            }
-            return render(request, 'assistir_playlist.html', context)
-        else:
-            return redirect('finalizou_playlist', id)
+    playlist_videos = playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
+
+    
+    if index_video < 0 or index_video > (len(playlist_videos) - 1):
+        return redirect('assistir_playlist', id=id, index_video=0)
+
+    video_atual = playlist_videos[index_video]
+    videos_liberados = get_videos_liberados(playlist_videos, request.user)
+
+    context = {
+        'playlist': playlist,
+        'playlist_videos': playlist_videos,
+        'video_atual': video_atual, 
+        'index_video': index_video,
+        'videos_liberados': videos_liberados,
+        'perfil': request.user.perfil
+    }
+    return render(request, 'assistir_playlist.html', context)
 
 
 @login_required(login_url="/auth/login")
@@ -337,6 +373,7 @@ def retirar_vida(request):
         'status': status,
         'vidas': vidas,
     })
+
 
 def obter_pergunta_e_resposta_correta(pergunta_id): 
     try:
@@ -404,6 +441,16 @@ def marcar_pergunta_respondida(usuario, pergunta, acertou):
 
     return novo_acerto
 
+def marcar_todas_perguntas_respondidas(request, id_video):
+    progressoVideo = get_object_or_404(ProgressoVideo, usuario=request.user, playlist_video=id_video)
+    progressoVideo.perguntas_respondidas = True
+    progressoVideo.save()
+
+    return JsonResponse({
+        'status': 'sucesso',
+        'mensagem': 'Perguntas marcadas como respondidas'
+    })
+
 
 def adicionar_xp_perfil(perfil, xp):
     perfil.xp += xp
@@ -413,11 +460,9 @@ def adicionar_xp_perfil(perfil, xp):
 @require_POST
 def marcar_video_assistido(request, id_video):
     video = get_object_or_404(PlaylistVideo, id=id_video)
-    progresso, created = ProgressoVideo.objects.get_or_create(usuario=request.user, playlist_video=video)
-    if created:
-        progresso.video_completo = True
-    else:
-        progresso.data_conclusao = timezone.now()
+    progresso = ProgressoVideo.objects.get_or_create(usuario=request.user, playlist_video=video)[0]
+    progresso.video_completo = True
+    progresso.data_conclusao = timezone.now()
     progresso.save()
     return JsonResponse({"completo": progresso.video_completo})
 
@@ -502,5 +547,4 @@ def get_reputacao(request):
         reputacao = 0
     else:
         reputacao = (somatorio_avaliacao_positiva / total) * 100
-    
     return int(reputacao)
