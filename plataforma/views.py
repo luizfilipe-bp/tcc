@@ -331,18 +331,31 @@ def get_videos_liberados(playlist_videos, usuario):
     videos_liberados = {p.playlist_video_id for p in progresso_videos}
     return videos_liberados
 
-
+def iniciar_progresso_video(usuario, playlist_video):
+    progresso_video, created = ProgressoVideo.objects.get_or_create(
+        usuario=usuario,
+        playlist_video=playlist_video,
+        defaults={
+            'video_completo': False,
+            'perguntas_respondidas': False,
+            'data_conclusao': None
+        }
+    )
+    if created:
+        progresso_video.save()
+    
 @login_required
 def assistir_playlist(request, id, index_video=0):
     playlist = get_object_or_404(Playlist, id=id)
-    playlist_videos = playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
+    playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
 
-    
-    if index_video < 0 or index_video > (len(playlist_videos) - 1):
-        return redirect('assistir_playlist', id=id, index_video=0)
-
-    video_atual = playlist_videos[index_video]
     videos_liberados = get_videos_liberados(playlist_videos, request.user)
+    if index_video < 0 or index_video >= len(playlist_videos) or index_video > len(videos_liberados):
+        return redirect('assistir_playlist', id=id, index_video=0)
+    
+    iniciar_progresso_video(request.user, playlist_video=playlist_videos[index_video])
+    videos_liberados.add(playlist_videos[index_video].id)
+    video_atual = playlist_videos[index_video]
 
     context = {
         'playlist': playlist,
@@ -444,6 +457,7 @@ def marcar_pergunta_respondida(usuario, pergunta, acertou):
 def marcar_todas_perguntas_respondidas(request, id_video):
     progressoVideo = get_object_or_404(ProgressoVideo, usuario=request.user, playlist_video=id_video)
     progressoVideo.perguntas_respondidas = True
+    progressoVideo.data_conclusao = timezone.now()
     progressoVideo.save()
 
     return JsonResponse({
@@ -460,7 +474,7 @@ def adicionar_xp_perfil(perfil, xp):
 @require_POST
 def marcar_video_assistido(request, id_video):
     video = get_object_or_404(PlaylistVideo, id=id_video)
-    progresso = ProgressoVideo.objects.get_or_create(usuario=request.user, playlist_video=video)[0]
+    progresso = ProgressoVideo.objects.get(usuario=request.user, playlist_video=video)
     progresso.video_completo = True
     progresso.data_conclusao = timezone.now()
     progresso.save()
@@ -548,3 +562,4 @@ def get_reputacao(request):
     else:
         reputacao = (somatorio_avaliacao_positiva / total) * 100
     return int(reputacao)
+
