@@ -68,29 +68,32 @@ class PerguntaForm(forms.Form):
         return cleaned_data
 
 
-class FormularioRespostaAlternativa(forms.Form):
-    pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
-    resposta = forms.ChoiceField(
-        widget=forms.RadioSelect,
-        choices=(), 
-        label="Escolha uma alternativa"
-    )
+class FormularioRespostaPergunta(forms.Form):
+	pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
+	resposta = forms.ChoiceField(
+		widget=forms.RadioSelect,
+		choices=(),  
+		label=""    
+	)
 
-    def __init__(self, *args, **kwargs):
-        alternativas = kwargs.pop('alternativas', [])
-        super().__init__(*args, **kwargs)
-        self.fields['resposta'].choices = [
-            (str(i + 1), alt) for i, alt in enumerate(alternativas)
-        ]
+	def __init__(self, *args, pergunta=None, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.fields['pergunta_id'].initial = pergunta.id
 
-
-class FormularioRespostaVerdadeiroFalso(forms.Form):
-    pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
-    resposta = forms.ChoiceField(
-        widget=forms.RadioSelect,
-        choices=[
-            ('True', 'Verdadeiro'),
-            ('False', 'Falso')
-        ],
-        label="Selecione Verdadeiro ou Falso"
-    )
+		if isinstance(pergunta, PerguntaAlternativas):
+			alternativas = [
+				pergunta.alternativa1,
+				pergunta.alternativa2,
+				pergunta.alternativa3,
+				pergunta.alternativa4,
+			]
+			self.fields['resposta'].choices = [
+				(str(i + 1), alt) for i, alt in enumerate(alternativas)
+			]
+			self.fields['resposta'].label = "Escolha uma alternativa"
+		else:
+			self.fields['resposta'].choices = [
+				('True', 'Verdadeiro'),
+				('False', 'Falso'),
+			]
+			self.fields['resposta'].label = "Selecione Verdadeiro ou Falso"

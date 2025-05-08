@@ -70,7 +70,8 @@
             <strong class="pergunta-texto"></strong>
         </div>
         <div class="card-body">
-            <form class="form-pergunta">
+            <form class="form-pergunta" method="POST">
+                {% csrf_token %}
                 <div class="form-container"></div>
                 <button type="submit" class="btn btn-primary">Enviar Resposta</button>
             </form>
@@ -98,20 +99,25 @@
 </template>
 
 <script>
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    const VIDEO_ATUAL_ID = {{ video_atual.id }};
+    const PLAYLIST_ID = {{ playlist.id }};
+    const CSRF_TOKEN = '{{ csrf_token }}';
 
     let player;
     let currentIndex = 0;
-    const video_atual_id = {{ video_atual.id }};
-    const playlist_id = {{ playlist.id}};
     let vidas = {{ perfil.vida }};
     let perguntas = [];
 
+    function loadYouTubeAPI() {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
+            host: 'https://www.youtube-nocookie.com',
             height: '460',
             width: '100%',
             videoId: '{{ video_atual.video.youtube_id }}',
@@ -126,9 +132,9 @@
     }
 
     function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.ENDED) {
-            document.getElementById('mensagem-info').style.display = 'none';  // Oculta a mensagem
-            document.getElementById('perguntas-section').style.display = 'block';  // Exibe as perguntas
+        if (event.data === YT.PlayerState.ENDED) {
+            document.getElementById('mensagem-info').style.display = 'none';
+            document.getElementById('perguntas-section').style.display = 'block';
             marcarVideoAssistido();
             carregarPerguntas();
         }
@@ -141,40 +147,42 @@
         }
     }
 
-    const retirarVida = async () => {
-        const response = await fetch(`/retirar_vida`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.status == 'sucesso'){
+    async function retirarVida() {
+        try {
+            const response = await fetch('/retirar_vida', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                },
+            });
+            const data = await response.json();
+            if (data.status === 'sucesso') {
                 vidas = data.vidas;
                 atualizarElementoVidas();
             }
-        })
+        } catch (error) {
+            console.error('Erro ao retirar vida:', error);
+        }
     }
+
     async function marcarVideoAssistido() {
-        fetch(`/marcar_video_assistido/${video_atual_id}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch(`/marcar_video_assistido/${VIDEO_ATUAL_ID}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN
+                }
+            });
+            const data = await response.json();
             console.log('Vídeo marcado como assistido:', data);
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Erro ao marcar vídeo como assistido:', error);
-        });
+        }
     }
 
     async function carregarPerguntas() {
         try {
-            const response = await fetch(`/playlists/${playlist_id}/assistir/get_perguntas_video/${video_atual_id}`);
+            const response = await fetch(`/playlists/${PLAYLIST_ID}/assistir/get_perguntas_video/${VIDEO_ATUAL_ID}`);
             const data = await response.json();
             perguntas = data.perguntas;
 
@@ -191,7 +199,7 @@
     async function exibirPergunta(index) {
         const pergunta = perguntas[index];
         try {
-            if(vidas != 0){
+            if (vidas > 0) {
                 const response = await fetch(`/get_formulario_resposta/${pergunta.id}`);
                 const data = await response.json();
 
@@ -213,7 +221,7 @@
                         await enviarResposta();
                     });
                 }
-            }else{
+            } else {
                 const feedbackEl = document.createElement('div');
                 feedbackEl.classList.add('alert', 'alert-danger');
                 feedbackEl.textContent = 'Você não tem vidas suficientes para responder a pergunta.';
@@ -222,26 +230,25 @@
                 container.appendChild(feedbackEl);
                 feedbackEl.scrollIntoView({ behavior: 'smooth' });
             }
-            
         } catch (error) {
             console.error('Erro ao carregar o formulário da pergunta:', error);
+            document.getElementById('perguntas-container').innerHTML = '<p>Erro ao carregar a pergunta. Tente novamente mais tarde.</p>';
         }
     }
 
-    async function marcarTodasPerguntasRespondidas(){
-        fetch(`/marcar_todas_perguntas_respondidas/${video_atual_id}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
+    async function marcarTodasPerguntasRespondidas() {
+        try {
+            const response = await fetch(`/marcar_todas_perguntas_respondidas/${VIDEO_ATUAL_ID}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN
+                }
+            });
+            const data = await response.json();
             console.log('Todas perguntas do vídeo marcadas como assistido:', data);
-        })
-        .catch(error => {
-            console.error('Erro ao marcar Pergunta como assistido:', error);
-        });
+        } catch (error) {
+            console.error('Erro ao marcar perguntas como respondidas:', error);
+        }
     }
 
     async function enviarResposta() {
@@ -249,39 +256,37 @@
             const form = document.querySelector('.form-pergunta');
             const formData = new FormData(form);
             const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;  
-  
+            submitBtn.disabled = true;
+
             const response = await fetch('/checar_resposta', {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
+                    'X-CSRFToken': CSRF_TOKEN
                 }
             });
             const data = await response.json();
-  
+
             const templateFeedback = document.getElementById('template-feedback');
             const feedbackClone = templateFeedback.content.cloneNode(true);
             const feedbackEl = feedbackClone.querySelector('#feedback');
-            
+
             if (data.acertou) {
                 feedbackEl.classList.add('alert-success');
-                feedbackEl.querySelector('.feedback-message').textContent =
-                `Parabéns! Você ganhou ${data.xp} XP!`;
+                feedbackEl.querySelector('.feedback-message').textContent = `Parabéns! Você ganhou ${data.xp} XP!`;
             } else {
-                feedbackEl.classList.add('alert-danger'); 
+                feedbackEl.classList.add('alert-danger');
                 feedbackEl.querySelector('.feedback-message').textContent = data.mensagem;
-                vida = retirarVida();
+                await retirarVida();
             }
-  
+
             feedbackEl.querySelector('.feedback-correct').textContent = data.texto_alternativa_correta;
-  
+
             const antigo = document.getElementById('feedback');
             if (antigo) antigo.remove();
-            document.getElementById('perguntas-container')
-                    .insertAdjacentElement('afterend', feedbackEl);
+            document.getElementById('perguntas-container').insertAdjacentElement('afterend', feedbackEl);
             feedbackEl.scrollIntoView({ behavior: 'smooth' });
-  
+
             document.getElementById('proxima-pergunta').addEventListener('click', () => {
                 feedbackEl.remove();
                 currentIndex++;
@@ -297,7 +302,14 @@
             });
         } catch (error) {
             console.error('Erro ao enviar resposta:', error);
+            const feedbackEl = document.createElement('div');
+            feedbackEl.classList.add('alert', 'alert-danger');
+            feedbackEl.textContent = 'Erro ao enviar resposta. Tente novamente mais tarde.';
+            document.getElementById('perguntas-container').insertAdjacentElement('afterend', feedbackEl);
+            feedbackEl.scrollIntoView({ behavior: 'smooth' });
         }
     }
+
+    loadYouTubeAPI();
 </script>
 {% endblock %}

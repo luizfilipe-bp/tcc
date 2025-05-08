@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 import urllib.parse as urlparse
-from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaAlternativa, FormularioRespostaVerdadeiroFalso
+from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaPergunta
 from django.contrib.auth.decorators import login_required
 from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista, Perfil, ProgressoPlaylist
 from dotenv import load_dotenv
@@ -267,27 +267,13 @@ def get_perguntas_video(request, id, id_playlist_video):
     return JsonResponse({'perguntas': perguntas})
 
 
-def get_formulario_resposta(request, id_pergunta):    
-    pergunta = PerguntaAlternativas.objects.filter(id=id_pergunta).first()
-    if pergunta:
-        alternativas = [
-            pergunta.alternativa1,
-            pergunta.alternativa2,
-            pergunta.alternativa3,
-            pergunta.alternativa4
-        ]
-        formulario = FormularioRespostaAlternativa(
-            alternativas=alternativas,
-            initial={'pergunta_id': pergunta.id}
-        )
-    else:
-        pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
-        formulario = FormularioRespostaVerdadeiroFalso(
-            initial={'pergunta_id': pergunta.id}
-        )
+def get_formulario_resposta(request, id_pergunta):
+	pergunta = PerguntaAlternativas.objects.filter(id=id_pergunta).first()
+	if not pergunta:
+		pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
 
-    formulario_html = formulario.as_p()
-    return JsonResponse({'formulario_html': formulario_html})        
+	formulario = FormularioRespostaPergunta(pergunta=pergunta)
+	return JsonResponse({'formulario_html': formulario.as_p()})      
 
 
 def get_progresso_playlist(usuario, playlist_videos):
