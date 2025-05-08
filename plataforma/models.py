@@ -128,7 +128,7 @@ class ProgressoPlaylist(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
     playlist_completa = models.BooleanField(default=False)
-    data_conclusao = models.DateTimeField()
+    data_conclusao = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ('usuario', 'playlist')

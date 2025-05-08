@@ -16,6 +16,8 @@ from django.db.models import Sum
 def principal(request):
     playlists = Playlist.objects.all()
     playlists = playlists.filter(playlistvideo__isnull=False).distinct()
+    playlists = playlists.prefetch_related('playlistvideo_set__video')
+
     return render(request, 'principal.html', {'playlists': playlists})
 
 @login_required(login_url='/auth/login')
@@ -297,8 +299,8 @@ def get_progresso_playlist(usuario, playlist_videos):
     if total == 0:
         return 0
     porcentagem_progresso = (somatorio_videos_completos / total) * 100
-    print(f"Somatório: {somatorio_videos_completos}, Total: {total}")
-    return int(porcentagem_progresso)
+    print(f"Somatório: {somatorio_videos_completos}, Total: {total}, Porcentagem: {porcentagem_progresso}")
+    return int(round(porcentagem_progresso))
 
 
 def finalizar_playlist(request, id):
@@ -308,9 +310,12 @@ def finalizar_playlist(request, id):
     progresso_playlist = get_progresso_playlist(request.user, playlist_videos)
     if progresso_playlist == 100:
         xp = 0
-        if not ProgressoPlaylist.objects.filter(usuario=request.user, playlist=playlist).exists():
+        progresso_playlist = get_object_or_404(ProgressoPlaylist, usuario=request.user, playlist=playlist)
+        if progresso_playlist.playlist_completa is False:
             xp = 200
-            progresso_playlist = ProgressoPlaylist.objects.create(usuario=request.user, playlist=playlist, playlist_completa=True, data_conclusao=timezone.now())
+            progresso_playlist = ProgressoPlaylist.objects.get(usuario=request.user, playlist=playlist)
+            progresso_playlist.playlist_completa = True
+            progresso_playlist.data_conclusao = timezone.now()
             progresso_playlist.save()
             verificarConquistaCursosConcluidos(request.user)
             adicionar_xp_perfil(request.user.perfil, xp)
@@ -348,6 +353,9 @@ def iniciar_progresso_video(usuario, playlist_video):
 def assistir_playlist(request, id, index_video=0):
     playlist = get_object_or_404(Playlist, id=id)
     playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
+
+    if index_video == 0:
+        ProgressoPlaylist.objects.get_or_create(usuario=request.user, playlist=playlist)
 
     videos_liberados = get_videos_liberados(playlist_videos, request.user)
     if index_video < 0 or index_video >= len(playlist_videos) or index_video > len(videos_liberados):
@@ -561,5 +569,5 @@ def get_reputacao(request):
         reputacao = 0
     else:
         reputacao = (somatorio_avaliacao_positiva / total) * 100
-    return int(reputacao)
+    return round(reputacao)
 
