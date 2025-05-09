@@ -27,11 +27,11 @@
 }
 
 .custom-radio label:hover {
-    border-color: #007bff;
+    border-color: #6366f1;
     background-color: rgba(0, 123, 255, 0.05);
 }
 
 .custom-radio label:has(input[type="radio"]:checked) {
-    border-color: #007bff;
+    border-color: #6366f1;
     background-color: rgba(0, 123, 255, 0.1);
 }

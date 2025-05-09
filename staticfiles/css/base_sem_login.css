@@ -1,0 +1,35 @@
+.login-container {
+    background: #f0f2f5;
+}
+
+.gradient-section {
+    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+    min-height: 100vh;
+}
+
+.login-card {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    max-width: 500px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #3b82f6;
+}
+
+.btn-primary {
+    background-color: #3b82f6;
+    border: none;
+    transition: all 0.5s;
+}
+
+.btn-primary:hover {
+    background-color: #111111;
+}
+
+.password-toggle:hover {
+    background-color: #e9ecef;
+}
+
