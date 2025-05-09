@@ -1,0 +1,37 @@
+.form-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.form-container label input[type="radio"] {
+    display: none;
+}
+
+
+.form-container .custom-radio {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+}
+
+.custom-radio label{
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+    background-color: #fff;
+    user-select: none;
+}
+
+.custom-radio label:hover {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.custom-radio label:has(input[type="radio"]:checked) {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}

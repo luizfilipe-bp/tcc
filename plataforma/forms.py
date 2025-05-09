@@ -71,11 +71,11 @@ class PerguntaForm(forms.Form):
 class FormularioRespostaPergunta(forms.Form):
 	pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
 	resposta = forms.ChoiceField(
-		widget=forms.RadioSelect,
+		widget=forms.RadioSelect(attrs={'class': 'custom-radio'}),  # <- Adiciona classe aqui
 		choices=(),  
 		label=""    
 	)
-
+     
 	def __init__(self, *args, pergunta=None, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.fields['pergunta_id'].initial = pergunta.id

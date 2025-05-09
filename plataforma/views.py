@@ -268,12 +268,12 @@ def get_perguntas_video(request, id, id_playlist_video):
 
 
 def get_formulario_resposta(request, id_pergunta):
-	pergunta = PerguntaAlternativas.objects.filter(id=id_pergunta).first()
-	if not pergunta:
-		pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
+    pergunta = PerguntaAlternativas.objects.filter(id=id_pergunta).first()
+    if not pergunta:
+        pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
 
-	formulario = FormularioRespostaPergunta(pergunta=pergunta)
-	return JsonResponse({'formulario_html': formulario.as_p()})      
+    formulario = FormularioRespostaPergunta(pergunta=pergunta)
+    return JsonResponse({'formulario_html': formulario.as_p()})      
 
 
 def get_progresso_playlist(usuario, playlist_videos):
