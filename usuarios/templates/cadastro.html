@@ -41,7 +41,7 @@
                         <div class="mb-3">
                             <label for="usuario" class="form-label">Usuário</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <span class="input-group-text"><i class="fas fa-user text-primary"></i></span>
                                 <input type="text" class="form-control form-control-lg" 
                                        placeholder="Crie seu nome de usuário" name="usuario" required>
                             </div>
@@ -50,7 +50,7 @@
                         <div class="mb-3">
                             <label for="email" class="form-label">E-mail</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <span class="input-group-text"><i class="fas fa-envelope text-primary"></i></span>
                                 <input type="email" class="form-control form-control-lg" 
                                        placeholder="Digite seu e-mail" name="email" required>
                             </div>
@@ -59,7 +59,7 @@
                         <div class="mb-3">
                             <label for="password" class="form-label">Senha</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <span class="input-group-text"><i class="fas fa-lock text-primary"></i></span>
                                 <input type="password" class="form-control form-control-lg" 
                                        id="password" placeholder="Crie uma senha" name="senha" required>
                                 <button class="btn btn-outline-secondary password-toggle" type="button" 
@@ -72,7 +72,7 @@
                         <div class="mb-4">
                             <label for="confirm_password" class="form-label">Confirmar Senha</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <span class="input-group-text"><i class="fas fa-lock text-primary"></i></span>
                                 <input type="password" class="form-control form-control-lg" 
                                        id="confirm_password" placeholder="Repita sua senha" name="confirma_senha" required>
                                 <button class="btn btn-outline-secondary password-toggle" type="button" 
@@ -90,9 +90,9 @@
                             <button type="submit" class="btn btn-primary btn-lg fw-bold">Criar Conta</button>
                         </div>
                         
-                        <div class="d-grid mb-0">
-                            <a href="/auth/login" class="text-center text-muted text-decoration-none hover-effect">
-                                Possui uma conta? Faça login
+                        <div class="d-grid">
+                            <a href="/auth/login" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Possui uma conta? Faça login
                             </a>
                         </div>
 

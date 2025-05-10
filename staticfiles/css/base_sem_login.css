@@ -19,14 +19,17 @@
     border-color: #3b82f6;
 }
 
+.btn{
+    transition: all 0.4s;
+}
+
 .btn-primary {
-    background-color: #3b82f6;
+    background-color: #3b82f6   ;
     border: none;
-    transition: all 0.5s;
 }
 
 .btn-primary:hover {
-    background-color: #111111;
+    background-color: #6366f1;
 }
 
 .password-toggle:hover {
