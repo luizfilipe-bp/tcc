@@ -9,8 +9,14 @@
 {% block titulo %}Principal{% endblock %}
 
 {% block conteudo %}
+
+<div class="explicacao text-white text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Explore os cursos</h1>
+        <p class="lead mb-0">Aprenda com conteúdos compartilhados por outras pessoas</p>
+    </div>
+</div>
 <div class="container-fluid mt-2">
-    <h1 class="mb-3 text-center">Playlists Disponíveis</h1>
     {% if playlists %}
         <div class="row row-cols-md-4 g-3">
             {% for playlist in playlists %}

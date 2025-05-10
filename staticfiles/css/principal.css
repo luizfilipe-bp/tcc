@@ -11,3 +11,9 @@
     transform: scale(1.03);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
+
+.explicacao {
+    background: linear-gradient(180deg, #6366f1 0%, #3b82f6 100%);
+    padding: 0rem 0.5rem 1rem 0.5rem;
+    margin-bottom: 1em;
+}
