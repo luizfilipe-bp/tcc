@@ -1,62 +1,114 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %}Detalhes da Playlist{% endblock %}
 
 {% block conteudo %}
-<div class="container mt-5">
-    <div class="card mb-4">
-        <div class="card-header">
-            <div>
-                <h1>{{ playlist.nome }}</h1>
+<div class="container py-4">
+    <div class="card border-0 shadow-lg mb-3">
+        <div class="card-header py-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>{{ playlist.nome }}</h1>
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <span class="badge bg-{{ playlist.nivel_dificuldade|lower }} rounded-pill py-2 px-3">
+                            {{ playlist.get_nivel_dificuldade_display }}
+                        </span>
+                        <span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill">
+                            {{ playlist.categoria }}
+                        </span>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <p class="mb-0 small">Criado por</p>
+                    <p class="mb-0 fw-bold">{{ playlist.autor.username }}</p>
+                </div>
             </div>
         </div>
         <div class="card-body">
-            <p><strong>Descrição:</strong> {{ playlist.descricao }}</p>
-            <p><strong>Nível de Dificuldade:</strong> {{ playlist.get_nivel_dificuldade_display }}</p>
-            <p><strong>Categoria:</strong> {{ playlist.categoria }}</p>
-            <p><strong>Autor:</strong> {{ playlist.autor.username }}</p>
+            <h5 class="text-muted mb-3">Descrição</h5>
+            <p>{{ playlist.descricao }}</p>
         </div>
     </div>
 
-    <div class="container mt-5">
-        <h2>Adicionar novo vídeo à playlist</h2>
-        <form method="post" action="{% url 'cadastrar_video' playlist.id %}">
-            {% csrf_token %}
-            {{ formulario.as_p }}
-            <button type="submit" class="btn btn-primary">Salvar</button>
-        </form>
+    <div class="card border-0 shadow-lg mb-3">
+        <div class="card-body p-4">
+            <h4 class="mb-4"><i class="fas fa-plus-circle me-2"></i>Adicionar Novo Vídeo</h4>
+            <form method="postf" action="{% url 'cadastrar_video' playlist.id %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                    {% for field in formulario %}
+                    <div class="col-md-6">
+                        <div class="">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary px-4 py-2">
+                            <i class="fas fa-save me-2"></i>Salvar Vídeo
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="container mt-2">
-        <h2>Vídeos da Playlist</h2>
-        {% if playlist_videos %}
-            <div>
-                {% for playlist_video in playlist_videos %}
-                    <div class="card mb-3">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col-md-2 text-center">
-                                <img src="{{ playlist_video.video.thumbnail }}" alt="Thumbnail do vídeo" style="width: 160px; height: 90px; object-fit: cover;">
+    <div class="card border-0 shadow-lg">
+        <div class="card-body p-4">
+            <h4 class="mb-4"><i class="fas fa-film me-2"></i>Vídeos da Playlist</h4>
+            
+            {% if playlist_videos %}
+                <div class="list-group">
+                    {% for playlist_video in playlist_videos %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-2">
+                                <img src="{{ playlist_video.video.thumbnail }}" 
+                                     class="rounded-3 thumbnail-video"
+                                     alt="Thumbnail">
                             </div>
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <h5 class="card-title font-weight-bold">{{ playlist_video.video.titulo }}</h5>
-                                    <p class="card-text mb-1"><strong>Nível:</strong> {{ playlist_video.get_nivel_dificuldade_display }}</p>
-                                    <p class="card-text"><strong>Canal:</strong> {{ playlist_video.video.canal }}</p>
+                            
+                            <div class="col-md-7">
+                                <h5 class="mb-1 fw-bold">{{ playlist_video.video.titulo }}</h5>
+                                <div class="d-flex gap-2 mb-2">
+                                    <span class="badge bg-{{ playlist_video.nivel_dificuldade|lower }} rounded-pill py-2 px-3">
+                                        {{ playlist_video.get_nivel_dificuldade_display }}
+                                    </span>     
+                                    <span class="text-muted">
+                                        Canal: {{ playlist_video.video.canal }}
+                                    </span>
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <a href="{% url 'perguntas_video' id=playlist.id id_video=playlist_video.video.id %}" class="btn btn-sm btn-primary"> Perguntas </a>
-                                <a href="{% url 'excluir_video' id=playlist.id id_video=playlist_video.video.id %}" class="btn btn-sm btn-danger">Excluir vídeo</a>
+                            
+                            <div class="col-md-3 text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'perguntas_video' id=playlist.id id_video=playlist_video.video.id %}" 
+                                       class="btn btn-outline-primary btn-sm px-3"
+                                       title="Gerenciar Perguntas">
+                                       Perguntas
+                                    </a>
+                                    <a href="{% url 'excluir_video' id=playlist.id id_video=playlist_video.video.id %}" 
+                                       class="btn btn-outline-danger btn-sm px-3"
+                                       title="Excluir Vídeo">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Não foi encontrada nenhum vídeo para essa playlist.</p>
-        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-video-slash fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Nenhum vídeo encontrado</h4>
+                    <p class="text-muted">Adicione seu primeiro vídeo ao curso</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
-       
-
 </div>
+
 {% endblock %}

@@ -6,10 +6,13 @@ class PlaylistForm(forms.ModelForm):
         model = Playlist
         fields = ['nome', 'descricao', 'nivel_dificuldade', 'categoria']
         widgets = {
-            'descricao': forms.Textarea(attrs={'rows': 3}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'maxlength': 50}),
+            'descricao': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'maxlength': 250}),
+            'nivel_dificuldade': forms.Select(attrs={'class': 'form-select'}),
+            'categoria': forms.TextInput(attrs={'class': 'form-control', 'maxlength': 40}),
         }
         labels = {
-            'nome': 'Nome da Playlist',
+            'nome': 'Nome do curso',
             'descricao': 'Descrição',
             'nivel_dificuldade': 'Nível de Dificuldade',
             'categoria': 'Categoria',
@@ -17,36 +20,81 @@ class PlaylistForm(forms.ModelForm):
 
 
 class PlaylistVideoForm(forms.Form):
-    url_video = forms.CharField(label='Link do Vídeo', max_length=50, required=True)
-    nivel_dificuldade = forms.ChoiceField(choices=DIFICULDADE, label="Nível de Dificuldade")
+    url_video = forms.CharField(
+        label='Link do Vídeo',
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    nivel_dificuldade = forms.ChoiceField(
+        choices=DIFICULDADE,
+        label="Nível de Dificuldade",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     labels = {
         'url_video': 'Link do vídeo',
         'nivel_dificuldade': 'Nível de Dificuldade',
     }
     
-
 class PerguntaForm(forms.Form):
     TIPO_PERGUNTA = [
         ('alternativas', 'Alternativas'),
         ('verdadeiro_falso', 'Verdadeiro ou Falso'),
     ]
     
-    tipo_pergunta = forms.ChoiceField(choices=TIPO_PERGUNTA, label="Tipo de Pergunta")
-    pergunta = forms.CharField(max_length=250, label="Texto da Pergunta")
+    tipo_pergunta = forms.ChoiceField(
+        choices=TIPO_PERGUNTA,
+        label="Tipo de Pergunta",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    pergunta = forms.CharField(
+        max_length=250,
+        label="Texto da Pergunta",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     
-    alternativa1 = forms.CharField(max_length=100, required=False, label="Alternativa 1")
-    alternativa2 = forms.CharField(max_length=100, required=False, label="Alternativa 2")
-    alternativa3 = forms.CharField(max_length=100, required=False, label="Alternativa 3")
-    alternativa4 = forms.CharField(max_length=100, required=False, label="Alternativa 4")
-    nivel_dificuldade = forms.ChoiceField(choices=DIFICULDADE, label="Nível de Dificuldade")
+    alternativa1 = forms.CharField(
+        max_length=100,
+        required=False,
+        label="Alternativa 1",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    alternativa2 = forms.CharField(
+        max_length=100,
+        required=False,
+        label="Alternativa 2",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    alternativa3 = forms.CharField(
+        max_length=100,
+        required=False,
+        label="Alternativa 3",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    alternativa4 = forms.CharField(
+        max_length=100,
+        required=False,
+        label="Alternativa 4",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    nivel_dificuldade = forms.ChoiceField(
+        choices=DIFICULDADE,
+        label="Nível de Dificuldade",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     alternativa_correta = forms.IntegerField(
         required=False,
         label="Alternativa Correta (1 a 4)",
         min_value=1,
-        max_value=4
+        max_value=4,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
-    resposta = forms.BooleanField(required=False, label="Resposta (Verdadeiro/Falso)")
+    resposta = forms.BooleanField(
+        required=False,
+        label="Ao marcar o campo a resposta correta será 'Verdadeira'. Deixar desmarcado para 'Falso'.",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -71,7 +119,7 @@ class PerguntaForm(forms.Form):
 class FormularioRespostaPergunta(forms.Form):
 	pergunta_id = forms.IntegerField(widget=forms.HiddenInput())
 	resposta = forms.ChoiceField(
-		widget=forms.RadioSelect(attrs={'class': 'custom-radio'}),  # <- Adiciona classe aqui
+		widget=forms.RadioSelect(attrs={'class': 'custom-radio'}),
 		choices=(),  
 		label=""    
 	)

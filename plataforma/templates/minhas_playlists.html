@@ -1,43 +1,80 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %}Minhas Playlists{% endblock %}
 
 {% block conteudo %}
-<div class="container mt-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Minhas Playlists</h1>
-        <a href="{% url 'cadastrar_playlist' %}" class="btn btn-primary mb-3">Adicionar Nova Playlist</a>
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+        <div class="mb-3 mb-md-0">
+            <h1 class="fw-bold text-primary">Meus cursos</h1>
+            <p class="text-muted mb-0">Gerencie os cursos que foram criados por você</p>
+        </div>
+        <a href="{% url 'cadastrar_playlist' %}" class="btn btn-primary px-4">
+            <i class="fas fa-plus me-2"></i>Nova Playlist
+        </a>
     </div>
-    <table class="table table-striped table-hover shadow-sm">
-        <thead>
-            <tr>
-                <th class="px-3 py-2">Nome</th>
-                <th class="px-3 py-2">Descrição</th>
-                <th class="px-3 py-2">Nível de Dificuldade</th>
-                <th class="px-3 py-2">Categoria</th>
-                <th class="px-3 py-2">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for playlist in playlists %}
-            <tr onclick="window.location.href='{% url 'detalhes_playlist' playlist.id %}'" style="cursor: pointer;">
-                <td>{{ playlist.nome }}</td>
-                <td>{{ playlist.descricao }}</td>
-                <td>{{ playlist.get_nivel_dificuldade_display }}</td>
-                <td>{{ playlist.categoria }}</td>
-                <td>
-                    <div class="d-flex">
-                        <a href="{% url 'editar_playlist' playlist.id %}" class="btn btn-sm btn-warning me-2">Editar</a>
-                        <a href="{% url 'excluir_playlist' playlist.id %}" class="btn btn-sm btn-danger">Deletar</a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">Nenhuma playlist encontrada.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <div class="card border-0 shadow-lg">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 text-uppercase small fw-bold">Nome</th>
+                            <th class="py-3 px-4 text-uppercase small fw-bold">Descrição</th>
+                            <th class="py-3 px-4 text-uppercase small fw-bold">Dificuldade</th>
+                            <th class="py-3 px-4 text-uppercase small fw-bold">Categoria</th>
+                            <th class="py-3 px-4 text-uppercase small fw-bold text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for playlist in playlists %}
+                        <tr class="linha-tabela" onclick="window.location.href='{% url 'detalhes_playlist' playlist.id %}'">
+                            <td class="py-3 px-4 fw-bold">{{ playlist.nome }}</td>
+                            <td class="py-3 px-4 text-muted">{{ playlist.descricao }}</td>
+                            <td class="py-3 px-4">
+                                <span class="badge bg-{{ playlist.nivel_dificuldade|lower }} rounded-pill py-2 px-3">
+                                    {{ playlist.get_nivel_dificuldade_display }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill">
+                                    {{ playlist.categoria }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'editar_playlist' playlist.id %}" 
+                                       class="btn btn-sm btn-outline-primary px-3 py-2"
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'excluir_playlist' playlist.id %}" 
+                                       class="btn btn-sm btn-outline-danger px-3 py-2"
+                                       title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-5 text-center">
+                                <div class="d-flex flex-column align-items-center text-muted">
+                                    <i class="fas fa-music fa-3x mb-3"></i>
+                                    <h4>Nenhuma playlist encontrada</h4>
+                                    <p class="mb-0">Comece criando sua primeira playlist</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
+
 {% endblock %}

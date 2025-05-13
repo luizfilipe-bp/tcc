@@ -18,5 +18,15 @@ html, body {
 }
 
 .bg-primary{
-    background-color: #6366f1!important;
+    background-color: #7b5dcd!important;
 }
+
+.thumbnail-video {
+    width: 160px;
+    height: 90px;
+    object-fit: cover;
+}
+
+.badge.bg-basico { background-color: #d1fae5; color: #059669; }
+.badge.bg-intermediario { background-color: #fef3c7; color: #d97706; }
+.badge.bg-avancado { background-color: #fee2e2; color: #dc2626; }

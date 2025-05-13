@@ -17,7 +17,7 @@
                 </div>
                 <div class="card-body">
                     <div class="ratio ratio-4x3">
-                        <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded" alt="{{ perfil.usuario.username }}" style="object-fit: cover; width: 100%; height: 100%;">
+                        <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded img-perfil" alt="{{ perfil.usuario.username }}">
                     </div>
                     <div class="list-group list-group-flush">
                         <div class="row g-3">
@@ -90,7 +90,7 @@
                                 <div class="col-6 col-md-4 col-lg-3">
                                     <div class="position-relative p-3 text-center">
                                         <img src="{{ conquista.tipo.imagem.url }}" 
-                                             class="img-fluid mb-3" 
+                                             class="img-fluid rounded-3 mb-2" 
                                              alt="{{ conquista.tipo.nome }}">
                                         <h6 class="mb-1">{{ conquista.tipo.nome }}</h6>
                                         <small class="text-muted d-block mb-2">{{ conquista.tipo.descricao }}</small>

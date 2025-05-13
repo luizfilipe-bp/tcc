@@ -1,4 +1,5 @@
 .thumbnail-video {
+    width: 100%;
     height: 140px;
     object-fit: cover;
 }
@@ -13,7 +14,7 @@
 }
 
 .explicacao {
-    background: linear-gradient(180deg, #6366f1 0%, #3b82f6 100%);
+    background: linear-gradient(180deg, #7b5dcd 0%, #397de9 100%);
     padding: 0rem 0.5rem 1rem 0.5rem;
     margin-bottom: 1em;
 }
