@@ -1,0 +1,16 @@
+{% extends 'principal.html' %}
+
+
+{% block texto-principal %}
+    <h1 class="display-4 fw-bold mb-3">Meus cursos</h1>
+    <p class="lead mb-0">Continue explorando cursos que você iniciou.</p>
+{% endblock%}
+
+{% block progresso %}
+    <div class="card-footer text-center bg-dark-subtle">
+        <div class="progress" style="height: 20px">
+            <div class="progress-bar bg-success" style="width: {{playlist.progresso}}%">{{playlist.progresso}}%</div>
+        </div>
+    </div>
+{% endblock%}
+

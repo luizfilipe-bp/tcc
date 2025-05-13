@@ -84,9 +84,58 @@
 
 <template id="template-feedback">
     <div id="feedback" class="alert">
-        <p class="feedback-message"></p>
-        <p>Resposta correta: <strong class="feedback-correct"></strong></p>
-        <button id="proxima-pergunta" class="btn btn-secondary">Próxima Questão</button>
+        <div class="row align-items-start"> 
+            <div class="col-md-9 mb-3"> 
+                <p class="feedback-message"></p>
+                <p>Resposta correta: <strong class="feedback-correct"></strong></p>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-primary h-100">
+                    <div class="card-body p-3">
+                        <form class="form-avaliacao">
+                            {% csrf_token %}
+                            <h6 class="mb-2 small">Como você avalia esta pergunta?</h6>
+                            <div class="d-flex gap-2 align-items-center">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="avaliacao" id="positiva" value="1" required>
+                                    <label class="form-check-label text-success" for="positiva">
+                                        <i class="fas fa-thumbs-up"></i> Boa pergunta
+                                    </label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="avaliacao" id="negativa" value="-1" required>
+                                    <label class="form-check-label text-danger" for="negativa">
+                                        <i class="fas fa-thumbs-down"></i> Pode melhorar
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-outline-primary mt-2">Enviar Avaliação</button>
+                        </form>
+                        <div class="avaliacao-resultado mt-2" style="display: none;">
+                            <div>
+                                <h6 class="mb-2 text-secondary">
+                                    <i class="fas fa-poll me-2"></i>Avaliações da Comunidade
+                                </h6>
+                                <div class="d-flex gap-3">
+                                    <span class="text-success">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span class="porcentagem-positiva">0%</span>
+                                    </span>
+                                    <span class="text-danger">
+                                        <i class="fas fa-thumbs-down"></i>
+                                        <span class="porcentagem-negativa">0%</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-100 mt-3 text-center">
+            <button id="proxima-pergunta" class="btn btn-secondary">Próxima Questão</button>
+        </div>
     </div>
 </template>
 
@@ -110,6 +159,7 @@
     let currentIndex = 0;
     let vidas = {{ perfil.vida }};
     let perguntas = [];
+    let pergunta;
 
     function loadYouTubeAPI() {
         const tag = document.createElement('script');
@@ -200,7 +250,7 @@
     }
 
     async function exibirPergunta(index) {
-        const pergunta = perguntas[index];
+        pergunta = perguntas[index];
         try {
             if (vidas > 0) {
                 const response = await fetch(`/get_formulario_resposta/${pergunta.id}`);
@@ -282,7 +332,6 @@
                 feedbackEl.querySelector('.feedback-message').textContent = data.mensagem;
                 await retirarVida();
             }
-
             feedbackEl.querySelector('.feedback-correct').textContent = data.texto_alternativa_correta;
 
             const antigo = document.getElementById('feedback');
@@ -290,6 +339,36 @@
             document.getElementById('perguntas-container').insertAdjacentElement('afterend', feedbackEl);
             feedbackEl.scrollIntoView({ behavior: 'smooth' });
 
+            const avaliacaoForm = feedbackEl.querySelector('.form-avaliacao');
+            avaliacaoForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(avaliacaoForm);
+                formData.append('pergunta_id', pergunta.id);
+
+                try {
+                    const response = await fetch('/avaliar_pergunta', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': CSRF_TOKEN
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();                        
+                        avaliacaoForm.style.display = 'none';
+                        
+                        const resultadoEl = feedbackEl.querySelector('.avaliacao-resultado');
+                        resultadoEl.style.display = 'block';
+                        
+                        resultadoEl.querySelector('.porcentagem-positiva').textContent = `${data.avaliacao_positiva}%`;
+                        resultadoEl.querySelector('.porcentagem-negativa').textContent = `${data.avaliacao_negativa}%`;
+                    }
+                } catch (error) {
+                    console.error('Erro ao enviar avaliação:', error);
+                }
+            });
+            
             document.getElementById('proxima-pergunta').addEventListener('click', () => {
                 feedbackEl.remove();
                 currentIndex++;

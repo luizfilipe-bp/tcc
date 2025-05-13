@@ -12,8 +12,10 @@
 
 <div class="explicacao text-white text-center">
     <div class="container">
-        <h1 class="display-4 fw-bold mb-3">Explore os cursos</h1>
-        <p class="lead mb-0">Aprenda com conteúdos compartilhados por outras pessoas</p>
+        {% block texto-principal %}
+            <h1 class="display-4 fw-bold mb-3">Explore os cursos</h1>
+            <p class="lead mb-0">Aprenda com conteúdos compartilhados por outras pessoas</p>
+        {% endblock%}
     </div>
 </div>
 <div class="container-fluid mt-2">
@@ -40,6 +42,9 @@
                     <div class="card-footer">
                         <p class="mb-0 text-muted small">Autor: {{ playlist.autor.username }}</p>
                     </div>
+                    {% block progresso %}
+
+                    {% endblock %}
                 </div>
             </div>
             {% endfor %}

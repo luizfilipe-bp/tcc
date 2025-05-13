@@ -32,6 +32,9 @@
                                     <i class="fas fa-heart text-danger me-1"></i>
                                     <p id="quantidade-vidas" class="mb-0">{{ user.perfil.vida }}</p>
                                 </li>
+                                <li>
+                                    <a class="nav-link active" href="/meu_aprendizado"><i class="fas fa-graduation-cap"></i> Meu aprendizado</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link active" href="/perfil"><i class="fas fa-user"></i> Perfil</a>
                                 </li>
@@ -40,13 +43,6 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link active" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
-                                </li>
-                            {% else %}
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="/auth/login"><i class="fas fa-sign-in-alt"></i> Login</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="/auth/cadastro"><i class="fas fa-user-plus"></i> Cadastro</a>
                                 </li>
                             {% endif %}
                         </ul>

@@ -138,10 +138,8 @@ class FormularioRespostaPergunta(forms.Form):
 			self.fields['resposta'].choices = [
 				(str(i + 1), alt) for i, alt in enumerate(alternativas)
 			]
-			self.fields['resposta'].label = "Escolha uma alternativa"
 		else:
 			self.fields['resposta'].choices = [
 				('True', 'Verdadeiro'),
 				('False', 'Falso'),
 			]
-			self.fields['resposta'].label = "Selecione Verdadeiro ou Falso"

@@ -218,6 +218,11 @@
                                         <div class="form-floating">
                                             {{ formulario.alternativa_correta }}
                                             <label for="{{ formulario.alternativa_correta.id_for_label }}">{{ formulario.alternativa_correta.label }}</label>
+                                            {% if formulario.alternativa_correta.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ formulario.alternativa_correta.errors }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

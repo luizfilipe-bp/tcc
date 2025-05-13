@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.principal, name='principal'),
+    path('meu_aprendizado', views.meu_aprendizado, name='meu_aprendizado'),
     path('playlists', views.minhas_playlists, name='playlists'),
     path('playlists/cadastrar', views.cadastrar_playlist, name='cadastrar_playlist'),
     path('playlists/editar/<int:id>', views.editar_playlist, name='editar_playlist'),
@@ -24,4 +25,6 @@ urlpatterns = [
     path('marcar_video_assistido/<int:id_video>', views.marcar_video_assistido, name='marcar_video_assistido'),
     path('marcar_todas_perguntas_respondidas/<int:id_video>', views.marcar_todas_perguntas_respondidas, name='marcar_todas_perguntas_respondidas'),
     path('retirar_vida', views.retirar_vida, name='retirar_vida'),
+    path('comprar_vida', views.comprar_vida, name='comprar_vida'),
+    path('avaliar_pergunta', views.avaliar_pergunta, name='avaliar_pergunta')
 ]

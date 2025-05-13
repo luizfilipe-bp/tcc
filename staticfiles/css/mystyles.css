@@ -21,6 +21,10 @@ html, body {
     background-color: #7b5dcd!important;
 }
 
+.btn-primary{
+    background-color: #7b5dcd!important;
+}
+
 .thumbnail-video {
     width: 160px;
     height: 90px;

@@ -16,7 +16,7 @@ from django.db.models import Sum
 def principal(request):
     playlists = Playlist.objects.all()
     playlists = playlists.filter(playlistvideo__isnull=False).distinct()
-    playlists = playlists.prefetch_related('playlistvideo_set__video')
+    playlists = playlists.exclude(autor=request.user)
 
     return render(request, 'principal.html', {'playlists': playlists})
 
@@ -294,8 +294,8 @@ def finalizar_playlist(request, id):
     playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
     
     progresso_playlist = get_progresso_playlist(request.user, playlist_videos)
+    xp = 0
     if progresso_playlist == 100:
-        xp = 0
         progresso_playlist = get_object_or_404(ProgressoPlaylist, usuario=request.user, playlist=playlist)
         if progresso_playlist.playlist_completa is False:
             xp = 200
@@ -305,6 +305,15 @@ def finalizar_playlist(request, id):
             progresso_playlist.save()
             verificarConquistaCursosConcluidos(request.user)
             adicionar_xp_perfil(request.user.perfil, xp)
+
+        elif progresso_playlist.data_conclusao:
+            semana_atual = timezone.now().isocalendar()[:2]
+            semana_conclusao = progresso_playlist.data_conclusao.isocalendar()[:2]
+            if semana_atual != semana_conclusao:
+                xp = 20
+                progresso_playlist.data_conclusao = timezone.now()
+                progresso_playlist.save()
+                adicionar_xp_perfil(request.user.perfil, xp)
     else:
         return redirect('assistir_playlist', id=id, index_video=0)
     
@@ -401,9 +410,9 @@ def obter_pergunta_e_resposta_correta(pergunta_id):
 
 def checar_resposta(request):
     XP_POR_NIVEL = {
-        'basico': 10,
-        'intermediario': 20,
-        'avancado': 30,
+        'basico': 20,
+        'intermediario': 30,
+        'avancado': 40,
     }   
     pergunta_id = request.POST.get('pergunta_id')
     resposta_cliente = request.POST.get('resposta')
@@ -415,14 +424,16 @@ def checar_resposta(request):
         novo_acerto = marcar_pergunta_respondida(request.user, pergunta, acertou)
         if novo_acerto:
             xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade)
-            adicionar_xp_perfil(request.user.perfil, xp)
             verificarConquistaPerguntasRespondidas(request.user)
+        else:
+            xp = 10
+        adicionar_xp_perfil(request.user.perfil, xp)        
 
     return JsonResponse({
         'acertou': acertou,
         'texto_alternativa_correta': texto_alternativa_correta,
         'xp': XP_POR_NIVEL.get(pergunta.nivel_dificuldade),
-        'mensagem': 'Você acertou!' if acertou else 'Você errou.'
+        'mensagem': 'Você acertou!' if acertou else 'Você errou. Tente novamente em um outro momento'
     })
 
 def marcar_pergunta_respondida(usuario, pergunta, acertou):
@@ -557,3 +568,60 @@ def get_reputacao(request):
         reputacao = (somatorio_avaliacao_positiva / total) * 100
     return round(reputacao)
 
+
+@login_required(login_url='/auth/login')
+def comprar_vida(request):
+    perfil = request.user.perfil
+    if perfil.vida < 10 and perfil.xp >= 100:
+        perfil.vida += 1
+        perfil.xp -= 100
+        perfil.save()
+    
+    return redirect('perfil')
+
+@login_required(login_url='/auth/login')
+def meu_aprendizado(request):    
+    usuario = request.user
+    progressos = ProgressoPlaylist.objects.filter(usuario=usuario)
+    playlist_ids = [p.playlist_id for p in progressos]
+
+    playlists = (
+        Playlist.objects
+        .filter(id__in=playlist_ids)
+        .exclude(autor=usuario)
+        .distinct()
+    )
+    for pl in playlists:
+        pl.progresso = get_progresso_playlist(usuario, PlaylistVideo.objects.filter(playlist=pl))
+
+    return render(request, 'meu_aprendizado.html', {'playlists': playlists})
+
+@login_required(login_url='/auth/login')
+def avaliar_pergunta(request):
+    if request.method == 'POST':
+        pergunta_id = request.POST.get('pergunta_id')
+        avaliacao = request.POST.get('avaliacao')
+
+        avaliacao = int(avaliacao)
+        pergunta = Pergunta.objects.get(id=pergunta_id)
+
+        if avaliacao == -1:
+            pergunta.avaliacao_negativa += 1
+        if avaliacao == 1:
+            pergunta.avaliacao_positiva += 1
+
+        pergunta.save()
+        total = pergunta.avaliacao_positiva + pergunta.avaliacao_negativa
+        positiva = round((pergunta.avaliacao_positiva / total) * 100)
+        negativa = round((pergunta.avaliacao_negativa / total) * 100)
+
+        return JsonResponse({
+            'status': 'sucesso',
+            'avaliacao_positiva': positiva,
+            'avaliacao_negativa': negativa
+        })
+    
+    return JsonResponse({
+        'status': 'erro',
+        'mensagem': 'Houve um erro no cadastro de avaliacao'
+    })

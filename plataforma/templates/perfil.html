@@ -19,48 +19,65 @@
                     <div class="ratio ratio-4x3">
                         <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded img-perfil" alt="{{ perfil.usuario.username }}">
                     </div>
-                    <div class="list-group list-group-flush">
-                        <div class="row g-3">
+                    <div class="list-group list-group-flush mt-1">
+                        <div class="row g-3 align-items-center">
                             <div class="col-6">
-                                <div class="p-1 text-center">
-                                    <div class="badge bg-success">{{ perfil.xp }} XP</div>
+                                <div class="p-2 text-center">
+                                    <span class="badge bg-success bg-opacity-25 text-success fs-6">
+                                        <i class="fas fa-star me-1"></i>{{ perfil.xp }} XP
+                                    </span>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="p-1 text-center">
-                                    <div class="fw-bold text-danger mb-1">Vidas: {{ perfil.vida }} <i class="fas fa-heart me-2"></i></div>
+                                <div class="p-2 text-center position-relative">
+                                    <div class="text-danger">
+                                        <span class="fw-bold">
+                                            <i class="fas fa-heart me-1"></i>Vidas: {{ perfil.vida }}
+                                        </span>
+                                        {% if perfil.vida < 10 %}
+                                            <div class="mt-1">
+                                                <a href="{% url 'comprar_vida' %}" class="btn btn-sm btn-outline-danger btn-xs">
+                                                    <i class="fas fa-plus small"></i> Recarregar
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-6">
                                 <div class="p-2 text-center">
-                                    <div class="stat-value fw-bold text-success mb-1">{{ perfil.cursos_concluidos }}</div>
+                                    <div class="stat-value fw-bold text-success mb-1">{{ perfil.cursos_concluidos }}
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
                                     <div class="small">Cursos Completos</div>
-                                    <i class="fas fa-graduation-cap text-success mt-2"></i>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-2 text-center">
-                                    <div class="fw-bold text-info mb-1">{{ perfil.perguntas_respondidas }}</div>
+                                    <div class="fw-bold text-info mb-1">{{ perfil.perguntas_respondidas }}
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
                                     <div class="small">Respostas Corretas</div>
-                                    <i class="fas fa-check-circle text-info mt-2"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-6">
                                 <div class="p-2 text-center">
-                                    <div class="fw-bold text-sucess mb-1 text-success">{{ perfil.cursos_criados}}</div>
+                                    <div class="fw-bold text-sucess mb-1 text-success">{{ perfil.cursos_criados}}
+                                        <i class="fas fa-book"></i>
+                                    </div>
                                     <div class="small">Cursos Criados</div>
-                                    <i class="fas fa-book text-success mt-2"></i>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-2 text-center">
-                                    <div class="fw-bold text-sucess mb-1 text-info">{{ perfil.perguntas_criadas}}</div>
+                                    <div class="fw-bold text-sucess mb-1 text-info">{{ perfil.perguntas_criadas}}
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
                                     <div class="small">Perguntas Criadas</div>
-                                    <i class="fas fa-question-circle text-info mt-2"></i>
                                 </div>
                             </div>
                         </div>
@@ -80,7 +97,7 @@
 
         <div class="col-md-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header bg-primary text-white">
                     <h4 class="mb-0"><i class="fas fa-trophy me-2"></i>Conquistas ({{ conquistas.count }})</h4>
                 </div>
                 <div class="card-body scroll-conquistas">
