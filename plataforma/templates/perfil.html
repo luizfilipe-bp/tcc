@@ -66,7 +66,7 @@
                         </div>
                         <div class="list-group-item">
                             <div class="d-flex justify-content-around align-items-center">
-                                <strong>Reputação:</strong>
+                                <strong>Reputação perguntas:</strong>
                                 <div class="reputacao-indicador">
                                     <div class="circulo-progresso" style="--progresso: {{ reputacao }}%;"></div>
                                     <span class="reputacao-valor">{{ reputacao }}%</span>
@@ -99,7 +99,7 @@
                                                 +{{ conquista.tipo.xp }} XP
                                             </span>
                                             <span class="text-muted">
-                                                {{ conquista.data_conquista|date:"M Y" }}
+                                                {{ conquista.data_conquista|date:"d M Y" }}
                                             </span>
                                         </div>
                                     </div>

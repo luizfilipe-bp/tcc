@@ -90,7 +90,7 @@
                                                     <i class="fas fa-thumbs-down"></i> {{ pergunta.avaliacao_negativa }}
                                                 </span>
                                             </div>
-                                            <small class="text-muted">{{ pergunta.criado_em|date:"d/m/Y H:i" }}</small>
+                                            <small class="text-muted">{{ pergunta.criado_em|date:"d/m/Y" }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -100,7 +100,7 @@
                     {% else %}
                         <div class="text-center py-4">
                             <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Nenhuma pergunta de alternativas encontrada</p>
+                            <p class="text-muted">Nenhuma pergunta de alternativas disponível</p>
                         </div>
                     {% endif %}
                 </div>
@@ -157,7 +157,7 @@
                     {% else %}
                         <div class="text-center py-4">
                             <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Nenhuma pergunta de verdadeiro/falso encontrada</p>
+                            <p class="text-muted">Nenhuma pergunta de verdadeiro/falso disponível</p>
                         </div>
                     {% endif %}
                 </div>
@@ -177,11 +177,6 @@
                         <div class="form-floating">
                             {{ formulario.tipo_pergunta }}
                             <label for="{{ formulario.tipo_pergunta.id_for_label }}">{{ formulario.tipo_pergunta.label }}</label>
-                            {% if formulario.tipo_pergunta.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ formulario.tipo_pergunta.errors }}
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
 
@@ -189,11 +184,6 @@
                         <div class="form-floating">
                             {{ formulario.nivel_dificuldade }}
                             <label for="{{ formulario.nivel_dificuldade.id_for_label }}">{{ formulario.nivel_dificuldade.label }}</label>
-                            {% if formulario.nivel_dificuldade.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ formulario.nivel_dificuldade.errors }}
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
 
@@ -201,11 +191,6 @@
                         <div class="form-floating">
                             {{ formulario.pergunta }}
                             <label for="{{ formulario.pergunta.id_for_label }}">{{ formulario.pergunta.label }}</label>
-                            {% if formulario.pergunta.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ formulario.pergunta.errors }}
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
 
@@ -233,11 +218,6 @@
                                         <div class="form-floating">
                                             {{ formulario.alternativa_correta }}
                                             <label for="{{ formulario.alternativa_correta.id_for_label }}">{{ formulario.alternativa_correta.label }}</label>
-                                            {% if formulario.alternativa_correta.errors %}
-                                                <div class="invalid-feedback d-block">
-                                                    {{ formulario.alternativa_correta.errors }}
-                                                </div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -254,16 +234,10 @@
                                     <label class="form-check-label" for="{{ formulario.resposta.id_for_label }}">
                                         {{ formulario.resposta.label }}
                                     </label>
-                                    {% if formulario.resposta.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ formulario.resposta.errors }}
-                                        </div>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-12 text-end">
                         <button type="submit" class="btn btn-primary px-4">
                             <i class="fas fa-save me-2"></i>Salvar Pergunta
