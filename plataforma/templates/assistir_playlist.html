@@ -94,7 +94,7 @@
     <div class="text-center mt-4">
         <h4>Parabéns! Você completou todas as perguntas.</h4>
         {% if index_video|add:1 >= playlist_videos|length %}
-            <a href="{% url 'finalizar_playlist' playlist.id %}" class="btn btn-success mt-3">Finalizar Playlist</a>
+            <a href="{% url 'finalizar_playlist' playlist.id %}" class="btn btn-success mt-3">Finalizar curso</a>
         {% else %}
             <a href="{% url 'assistir_playlist' id=playlist.id index_video=index_video|add:1 %}" class="btn btn-success mt-3">Próximo Vídeo</a>
         {% endif %}
