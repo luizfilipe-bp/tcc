@@ -105,15 +105,6 @@
 </div>
 
 <script>
-    function alterarVisibilidadeSenha(fieldId) {
-        const field = document.getElementById(fieldId);
-        if (field.type === "password") {
-            field.type = "text";
-        } else {
-            field.type = "password";
-        }
-    }
-
     function validaSenha() {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;

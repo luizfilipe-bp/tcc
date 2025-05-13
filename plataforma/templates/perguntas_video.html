@@ -172,13 +172,6 @@
         <div class="card-body">
             <form method="POST" action="{% url 'cadastrar_pergunta' id=playlist_video.playlist.id id_video=playlist_video.video.id %}">
                 {% csrf_token %}
-                
-                {% if formulario.errors %}
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>Corrija os erros abaixo
-                    </div>
-                {% endif %}
-
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="form-floating">

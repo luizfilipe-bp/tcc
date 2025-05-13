@@ -9,7 +9,7 @@
         <div class="card-header py-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1>{{ playlist.nome }}</h1>
+                    <h2>{{ playlist.nome }}</h2>
                     <div class="d-flex align-items-center gap-2 mt-2">
                         <span class="badge bg-{{ playlist.nivel_dificuldade|lower }} rounded-pill py-2 px-3">
                             {{ playlist.get_nivel_dificuldade_display }}
@@ -34,7 +34,7 @@
     <div class="card border-0 shadow-lg mb-3">
         <div class="card-body p-4">
             <h4 class="mb-4"><i class="fas fa-plus-circle me-2"></i>Adicionar Novo Vídeo</h4>
-            <form method="postf" action="{% url 'cadastrar_video' playlist.id %}">
+            <form method="POST" action="{% url 'cadastrar_video' playlist.id %}">
                 {% csrf_token %}
                 <div class="row g-3">
                     {% for field in formulario %}
