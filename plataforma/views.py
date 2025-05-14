@@ -273,7 +273,7 @@ def get_formulario_resposta(request, id_pergunta):
         pergunta = get_object_or_404(PerguntaVerdadeiroFalso, id=id_pergunta)
 
     formulario = FormularioRespostaPergunta(pergunta=pergunta)
-    return JsonResponse({'formulario_html': formulario.as_p()})      
+    return JsonResponse({'formulario_html': formulario.as_div()})      
 
 
 def get_progresso_playlist(usuario, playlist_videos):
