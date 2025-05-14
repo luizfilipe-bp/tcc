@@ -289,6 +289,20 @@ def get_progresso_playlist(usuario, playlist_videos):
     return int(round(porcentagem_progresso))
 
 
+def get_corretude_perguntas_playlist(usuario, playlist_videos):
+    progresso_perguntas = ProgressoPergunta.objects.filter(usuario=usuario, pergunta__video_pergunta__in=playlist_videos)
+
+    somatorio_perguntas_corretas = progresso_perguntas.filter(acertou=True).count()
+    total = progresso_perguntas.count()
+    
+    corretude = 0
+    if total != 0:
+        corretude = (somatorio_perguntas_corretas / total) * 100
+
+    print(f'corretude pergunta: {corretude}')
+    return int(round(corretude))
+
+
 def finalizar_playlist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
     playlist_videos = PlaylistVideo.objects.filter(playlist=playlist)
@@ -377,10 +391,8 @@ def retirar_vida(request):
     perfil = request.user.perfil
     
     if perfil.vida > 0:
-        perfil.vida -= 1
-        perfil.save()
+        vidas = perfil.retirar_vida()
         status = 'sucesso'
-        vidas = perfil.vida
     else:
         status = 'erro'
         vidas = 0
@@ -420,19 +432,19 @@ def checar_resposta(request):
     pergunta, alternativa_correta, texto_alternativa_correta = obter_pergunta_e_resposta_correta(pergunta_id)
 
     acertou = (resposta_cliente == alternativa_correta)
-    if acertou:
-        novo_acerto = marcar_pergunta_respondida(request.user, pergunta, acertou)
-        if novo_acerto:
-            xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade)
-            verificarConquistaPerguntasRespondidas(request.user)
-        else:
-            xp = 10
-        adicionar_xp_perfil(request.user.perfil, xp)        
+    xp = 0
+    novo_acerto = marcar_pergunta_respondida(request.user, pergunta, acertou)
+    if novo_acerto:
+        xp = XP_POR_NIVEL.get(pergunta.nivel_dificuldade)
+        verificarConquistaPerguntasRespondidas(request.user)
+    else:
+        xp = 5
+    adicionar_xp_perfil(request.user.perfil, xp)        
 
     return JsonResponse({
         'acertou': acertou,
         'texto_alternativa_correta': texto_alternativa_correta,
-        'xp': XP_POR_NIVEL.get(pergunta.nivel_dificuldade),
+        'xp': xp,
         'mensagem': 'Você acertou!' if acertou else 'Você errou. Tente novamente em um outro momento'
     })
 
@@ -593,6 +605,7 @@ def meu_aprendizado(request):
     )
     for pl in playlists:
         pl.progresso = get_progresso_playlist(usuario, PlaylistVideo.objects.filter(playlist=pl))
+        pl.corretude = get_corretude_perguntas_playlist(usuario, PlaylistVideo.objects.filter(playlist=pl))
 
     return render(request, 'meu_aprendizado.html', {'playlists': playlists})
 

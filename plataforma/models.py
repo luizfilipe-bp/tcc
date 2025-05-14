@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import FileExtensionValidator
+from django.utils import timezone
+from datetime import timedelta
 
 DIFICULDADE = [
     ('basico', 'Básico'),
@@ -20,6 +22,32 @@ class Perfil(models.Model):
     cursos_criados = models.IntegerField(default=0)
     perguntas_criadas = models.IntegerField(default=0)
     perguntas_respondidas = models.IntegerField(default=0)
+
+    ultima_recarga_vida = models.DateTimeField(default=timezone.now)
+    vida_maxima = models.IntegerField(default=10)
+
+    def retirar_vida(self):
+        if self.vida == self.vida_maxima:
+            self.ultima_recarga_vida = timezone.now()
+
+        if self.vida > 0:
+            self.vida -= 1
+            self.save()
+            return self.vida
+        return 0
+    
+    def recarregar_vida_por_hora(self):
+        agora = timezone.now()
+        horas_passadas = int((agora - self.ultima_recarga_vida).total_seconds() // 3600)
+
+        if horas_passadas >= 1 and self.vida < self.vida_maxima:
+            vidas_recuperadas = min(horas_passadas, self.vida_maxima - self.vida)
+            self.vida += vidas_recuperadas
+            self.ultima_recarga_vida += timedelta(hours=vidas_recuperadas)
+
+            if self.vida == self.vida_maxima:
+                self.ultima_recarga_vida = agora
+            self.save()
 
     def __str__(self):
         return f'{self.usuario.username}'

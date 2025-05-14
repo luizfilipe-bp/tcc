@@ -7,10 +7,25 @@
 {% endblock%}
 
 {% block progresso %}
-    <div class="card-footer text-center bg-dark-subtle">
-        <div class="progress" style="height: 20px">
-            <div class="progress-bar bg-success" style="width: {{playlist.progresso}}%">{{playlist.progresso}}%</div>
+<div class="card-footer text-center bg-dark-subtle">
+    <div class="p-1 bg-white rounded-2 mb-2">
+        <p class="mb-0 d-flex justify-content-between align-items-center small">
+            <span class="text-start small text-muted">Progresso do Curso</span>
+            <span class="text-end small text-muted">{{playlist.progresso}}%</span>
+        
+        </p>
+        <div class="progress" style=" height: 12px">
+            <div class="progress-bar" role="progressbar" style="width: {{playlist.progresso}}%;"></div>
         </div>
-    </div>
+    </div>    
+    <div class="p-1 bg-white rounded-2">
+        <p class="mb-0 d-flex justify-content-between align-items-center small">
+            <span class="text-muted">Taxa de acertos</span>
+            <span class="badge bg-success text-white fs-7 px-2 py-2 rounded-1">
+                {{playlist.corretude}}%
+            </span>
+        </p>
+    </div>  
+</div>
 {% endblock%}
 

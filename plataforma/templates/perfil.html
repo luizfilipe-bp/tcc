@@ -34,12 +34,15 @@
                                         <span class="fw-bold">
                                             <i class="fas fa-heart me-1"></i>Vidas: {{ perfil.vida }}
                                         </span>
-                                        {% if perfil.vida < 10 %}
+                                        {% if perfil.vida < perfil.vida_maxima %}
                                             <div class="mt-1">
                                                 <a href="{% url 'comprar_vida' %}" class="btn btn-sm btn-outline-danger btn-xs">
                                                     <i class="fas fa-plus small"></i> Recarregar
                                                 </a>
                                             </div>
+                                            <small >
+                                                Recarga automática {{ perfil.ultima_recarga_vida|timesince }} atrás
+                                            </small>
                                         {% endif %}
                                     </div>
                                 </div>

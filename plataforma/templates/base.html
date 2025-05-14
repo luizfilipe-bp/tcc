@@ -17,7 +17,7 @@
         <header>
             <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
                 <div class="container">
-                    <a class="navbar-brand d-flex align-items-center" href="/">
+                    <a class="navbar-brand d-flex align-items-center hover-effect" href="/">
                         <img src="/media/img/icons/knowledge-graph.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
                         <span>SABER</span>
                     </a>
@@ -28,21 +28,21 @@
                     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                         <ul class="navbar-nav">
                             {% if user.is_authenticated %}
-                                <li class="nav-item d-flex align-items-center me-2">
-                                    <i class="fas fa-heart text-danger me-1"></i>
+                                <li class="nav-item d-flex align-items-center me-2 text-white ">
+                                    <i class="fas fa-heart text-white me-1"></i>
                                     <p id="quantidade-vidas" class="mb-0">{{ user.perfil.vida }}</p>
                                 </li>
                                 <li>
-                                    <a class="nav-link active" href="/meu_aprendizado"><i class="fas fa-graduation-cap"></i> Meu aprendizado</a>
+                                    <a class="nav-link active hover-effect" href="/meu_aprendizado"><i class="fas fa-graduation-cap"></i> Meu aprendizado</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active" href="/perfil"><i class="fas fa-user"></i> Perfil</a>
+                                    <a class="nav-link active hover-effect" href="/perfil"><i class="fas fa-user"></i> Perfil</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active" href="/playlists"><i class="fas fa-book"></i> Gerenciar Cursos</a>
+                                    <a class="nav-link active hover-effect" href="/playlists"><i class="fas fa-book"></i> Gerenciar Cursos</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                                    <a class="nav-link active hover-effect" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
                                 </li>
                             {% endif %}
                         </ul>
@@ -55,11 +55,7 @@
             {% block conteudo %}
             {% endblock %}
         </main>
-        <!--
-        <footer class="text-white text-center p-3 mt-5">
-            <p>&copy; Portal Biblioteca. Todos os direitos reservados.</p>
-        </footer>
-        -->
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         {% block script %}
         {% endblock %}

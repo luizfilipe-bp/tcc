@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Perfil, Playlist, Video, PlaylistVideo, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, TipoConquista, Conquista, ProgressoPlaylist
+from .models import Perfil, Playlist, Video, PlaylistVideo, TipoConquista, Conquista, ProgressoPlaylist, ProgressoPergunta, \
+	PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo
 
 class PerfilAdmin(admin.ModelAdmin):
     list_display = (['usuario'])
@@ -31,6 +32,9 @@ class ConquistaAdmin(admin.ModelAdmin):
 class ProgressoPlaylistAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'playlist', 'playlist_completa')
 
+class ProgressoPerguntaAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'pergunta', 'respondida', 'acertou')
+
 admin.site.register(Perfil, PerfilAdmin)
 admin.site.register(Playlist, PlaylistAdmin)
 admin.site.register(Video, VideoAdmin)
@@ -41,3 +45,4 @@ admin.site.register(ProgressoVideo, ProgressoVideoAdmin)
 admin.site.register(TipoConquista, TipoConquistaAdmin)
 admin.site.register(Conquista, ConquistaAdmin)
 admin.site.register(ProgressoPlaylist, ProgressoPlaylistAdmin)
+admin.site.register(ProgressoPergunta, ProgressoPerguntaAdmin)

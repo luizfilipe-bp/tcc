@@ -11,10 +11,9 @@ html, body {
     background-color: whitesmoke;
 }
 
-
-#quantidade-vidas{
-    font-size: 18px;
-    color: red;   
+.hover-effect:hover {
+    transform: scale(1.03);
+    transition: transform 0.3s;
 }
 
 .bg-primary{
