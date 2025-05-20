@@ -66,11 +66,9 @@ def save_user_profile(instance, **kwargs):
 
 class Video(models.Model):
     youtube_id = models.CharField(max_length=11, unique=True)
-    #thumbnail = models.FileField(upload_to='uploads/videos/thumbnails', blank=True, null=True, validators = [FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg'])])
     thumbnail = models.URLField(max_length=200)
     titulo = models.CharField(max_length=150)
     canal = models.CharField(max_length=150)
-    # visivel = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.titulo}"
     

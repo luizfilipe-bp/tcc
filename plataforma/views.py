@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
-import urllib.parse as urlparse
+from urllib.parse import urlparse, parse_qs
+
 from .forms import PlaylistForm, PlaylistVideoForm, PerguntaForm, FormularioRespostaPergunta
 from django.contrib.auth.decorators import login_required
 from .models import Playlist, Video, PlaylistVideo, Pergunta, PerguntaAlternativas, PerguntaVerdadeiroFalso, ProgressoVideo, ProgressoPergunta, TipoConquista, Conquista, Perfil, ProgressoPlaylist
@@ -78,24 +79,21 @@ def excluir_playlist(request, id):
 
 
 def extrair_id_video(url):
-    if not url.startswith(('http://', 'https://')):
-        url = 'https://' + url
-
-    parse_result = urlparse.urlparse(url)
-    id_video = None
-
-    if parse_result.netloc in ['www.youtube.com', 'youtube.com']:
-        query = urlparse.parse_qs(parse_result.query)
-        id_video = query['v'][0]
-    elif parse_result.netloc == 'youtu.be':
-        id_video = parse_result.path[1:]
-
-    return id_video
+    try:
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        video_id = query_params.get("v")
+        if video_id:
+            return video_id[0]
+        if 'youtu.be' in parsed_url.netloc:
+            return parsed_url.path.strip("/")
+    except Exception:
+        return None
 
 
 def buscar_informacoes_video(id_video):
     load_dotenv()
-    url = os.getenv('YOUTUBE_API_URL')
+    url = "https://www.googleapis.com/youtube/v3/videos"
     api_key = os.getenv('YOUTUBE_API_KEY')
 
     params = {
@@ -107,8 +105,11 @@ def buscar_informacoes_video(id_video):
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        return response.json()
-    
+        data = response.json()
+        if not data.get("items"):
+            print(f"ID de vídeo inválido ou vídeo não encontrado: {id_video}")
+            return None
+        return data
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar informações do vídeo: {e}")
         return None
@@ -123,12 +124,15 @@ def cadastrar_video(request, id):
             nivel_dificuldade = formulario.cleaned_data.get('nivel_dificuldade')
             
             id_video = extrair_id_video(url_video)
+            if id_video is None:
+                return redirect('detalhes_playlist', id)
+            
+            data = buscar_informacoes_video(id_video)
+            if data is None:
+                return redirect('detalhes_playlist', id)
+            
             video, created = Video.objects.get_or_create(youtube_id=id_video)
-
-            # Se for um vídeo novo, busca informações na API
             if created:
-                data = buscar_informacoes_video(id_video)
-                if data:
                     snippet = data["items"][0]["snippet"]
                     
                     print(snippet)
@@ -148,10 +152,7 @@ def cadastrar_video(request, id):
                 )
             return redirect('detalhes_playlist', id)  
 
-    else:
-        formulario = PlaylistVideoForm()
-
-    return render(request, "cadastrar_video.html", {"formulario": formulario, "playlist": playlist})
+    return redirect('detalhes_playlist', id)
 
 def excluir_video(request, id, id_video):
     playlist = Playlist.objects.get(id=id)
@@ -160,7 +161,7 @@ def excluir_video(request, id, id_video):
     playlist_video.delete()
     return redirect('detalhes_playlist', id)
 
-
+@login_required(login_url='/auth/login')
 def detalhes_playlist(request, id):
     playlist = Playlist.objects.get(id=id)
     playlist_videos = PlaylistVideo.objects.filter(playlist=id)
@@ -213,6 +214,7 @@ def cadastrar_pergunta(request, id, id_video):
     return redirect('perguntas_video', id, id_video)
     
 
+@login_required(login_url='/auth/login')
 def perguntas_video(request, id, id_video, playlist_video=None):
     playlist_video = get_object_or_404(PlaylistVideo, playlist=id, video=id_video)
     perguntas_alternativas = PerguntaAlternativas.objects.filter(video_pergunta=playlist_video)    
@@ -604,8 +606,14 @@ def meu_aprendizado(request):
         .distinct()
     )
     for pl in playlists:
-        pl.progresso = get_progresso_playlist(usuario, PlaylistVideo.objects.filter(playlist=pl))
-        pl.corretude = get_corretude_perguntas_playlist(usuario, PlaylistVideo.objects.filter(playlist=pl))
+        pl.progresso = get_progresso_playlist(
+            usuario, 
+            PlaylistVideo.objects.filter(playlist=pl)
+        )
+        pl.corretude = get_corretude_perguntas_playlist(
+            usuario, 
+            PlaylistVideo.objects.filter(playlist=pl)
+        )
 
     return render(request, 'meu_aprendizado.html', {'playlists': playlists})
 

@@ -134,10 +134,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# YOUTUBE API
-YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
-YOUTUBE_API_URL = os.getenv('YOUTUBE_API_URL')
-
 STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'productionfiles'
