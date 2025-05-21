@@ -49,6 +49,11 @@ class Perfil(models.Model):
                 self.ultima_recarga_vida = agora
             self.save()
 
+    def minutos_para_proxima_recarga(self):
+        agora = timezone.now()
+        minutos_passados = (agora - self.ultima_recarga_vida).total_seconds() // 60
+        return max(0, 60 - int(minutos_passados))
+
     def __str__(self):
         return f'{self.usuario.username}'
 
