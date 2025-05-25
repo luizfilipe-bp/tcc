@@ -30,7 +30,10 @@
 										<span class="fw-bold">{{ pv.video.titulo }}</span>
 										<div>
 											<small class="text-muted">
-                                                <strong>Nível:</strong> {{ pv.nivel_dificuldade }}
+                                                <strong>Nível:</strong>
+                                            </small>
+                                            <small class="badge bg-{{ pv.nivel_dificuldade|lower }}">
+                                                {{ pv.get_nivel_dificuldade_display }}
                                             </small>
 										</div>
 									</div>
@@ -41,7 +44,12 @@
 									<div class="opacity-50">
 										<span class="fw-bold">{{ pv.video.titulo }}</span>
 										<div>
-											<small class="text-muted"><strong>Nível:</strong> {{ pv.nivel_dificuldade }}</small>
+                                            <small class="text-muted">
+                                                <strong>Nível:</strong>
+                                            </small>
+                                            <small class="badge bg-{{ pv.nivel_dificuldade|lower }}">
+                                                {{ pv.get_nivel_dificuldade_display }}
+                                            </small>
 										</div>
 									</div>
 								</li>

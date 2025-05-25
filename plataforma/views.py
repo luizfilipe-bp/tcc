@@ -175,14 +175,15 @@ def cadastrar_pergunta(request, id, id_video):
         if formulario.is_valid():
             tipo_pergunta = formulario.cleaned_data['tipo_pergunta']
             pergunta = formulario.cleaned_data['pergunta']
+            nivel_dificuldade = formulario.cleaned_data['nivel_dificuldade']
             autor = request.user
             video_pergunta = PlaylistVideo.objects.get(playlist=id, video=id_video)
-            print(tipo_pergunta, pergunta, autor, video_pergunta)
             if tipo_pergunta == 'alternativas':
                 PerguntaAlternativas.objects.create(
                     pergunta=pergunta,
                     autor=autor,
                     video_pergunta=video_pergunta,
+                    nivel_dificuldade=nivel_dificuldade,
                     alternativa1=formulario.cleaned_data['alternativa1'],
                     alternativa2=formulario.cleaned_data['alternativa2'],
                     alternativa3=formulario.cleaned_data['alternativa3'],
@@ -193,23 +194,10 @@ def cadastrar_pergunta(request, id, id_video):
                     pergunta=pergunta,
                     autor=autor,
                     video_pergunta=video_pergunta,
+                    nivel_dificuldade=nivel_dificuldade,
                     resposta=formulario.cleaned_data['resposta']
                 )
-
             verificarConquistaPerguntasCriadas(request.user)
-            return redirect('perguntas_video', id, id_video)
-        else:
-
-            playlist_video = get_object_or_404(PlaylistVideo, playlist=id, video=id_video)
-            perguntas_alternativas = PerguntaAlternativas.objects.filter(video_pergunta=playlist_video)    
-            perguntas_verdadeiro_falso = PerguntaVerdadeiroFalso.objects.filter(video_pergunta=playlist_video)
-            return render(request, 'perguntas_video.html', 
-                {        
-                    'playlist_video': playlist_video,
-                    'formulario': formulario, 
-                    'perguntas_alternativas': perguntas_alternativas,
-                    'perguntas_verdadeiro_falso': perguntas_verdadeiro_falso,
-                })   
 
     return redirect('perguntas_video', id, id_video)
     
