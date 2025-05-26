@@ -22,10 +22,10 @@ def principal(request):
     return render(request, 'principal.html', {'playlists': playlists})
 
 @login_required(login_url='/auth/login')
-def perfil(request):
-    perfil = get_object_or_404(Perfil, usuario=request.user)
-    conquistas = Conquista.objects.filter(usuario=request.user).order_by('-data_conquista')
-    reputacao = get_reputacao(request)
+def perfil(request, id):
+    perfil = get_object_or_404(Perfil, usuario=id)
+    conquistas = Conquista.objects.filter(usuario=perfil.usuario).order_by('-data_conquista')
+    reputacao = get_reputacao(perfil.usuario)
     context = {
         'perfil': perfil,
         'conquistas': conquistas,
@@ -556,8 +556,7 @@ def registrar_conquista(usuario, nome_conquista):
         adicionar_xp_perfil(usuario.perfil, tipo.xp)
         
 
-def get_reputacao(request):
-    usuario = request.user
+def get_reputacao(usuario):
     perguntas = Pergunta.objects.filter(autor=usuario)
 
     somatorio_avaliacao_positiva = perguntas.aggregate(Sum('avaliacao_positiva'))['avaliacao_positiva__sum'] or 0

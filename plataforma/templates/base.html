@@ -36,7 +36,7 @@
                                     <a class="nav-link active hover-effect" href="/meu_aprendizado"><i class="fas fa-graduation-cap"></i> Meu aprendizado</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link active hover-effect" href="/perfil"><i class="fas fa-user"></i> Perfil</a>
+                                    <a class="nav-link active hover-effect" href="{% url 'perfil' id=user.id %}"><i class="fas fa-user"></i> Perfil</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link active hover-effect" href="/playlists"><i class="fas fa-book"></i> Gerenciar Cursos</a>

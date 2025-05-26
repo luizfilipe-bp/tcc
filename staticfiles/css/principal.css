@@ -18,3 +18,11 @@
     padding: 0rem 0.5rem 1rem 0.5rem;
     margin-bottom: 1em;
 }
+
+.link-hover{
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.link-hover:hover {
+    color: #7b5dcd;
+}

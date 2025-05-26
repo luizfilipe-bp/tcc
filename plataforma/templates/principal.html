@@ -39,9 +39,12 @@
                             <span class="badge bg-secondary">{{ playlist.categoria }}</span>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <p class="mb-0 text-muted small">Autor: {{ playlist.autor.username }}</p>
-                    </div>
+                    <a href="{% url 'perfil' id=playlist.autor.id %}"
+                    class="card-footer d-block text-decoration-none link-hover">
+                        <p class="mb-0">
+                            Autor: {{ playlist.autor.username }}
+                        </p>
+                    </a>
                     {% block progresso %}
 
                     {% endblock %}

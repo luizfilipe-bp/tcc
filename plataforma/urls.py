@@ -18,7 +18,7 @@ urlpatterns = [
     path('playlists/<int:id>/assistir/get_perguntas_video/<int:id_playlist_video>', views.get_perguntas_video, name='get_perguntas_video'),
     path('playlists/<int:id>/assistir/finalizar_playlist', views.finalizar_playlist, name='finalizar_playlist'),
 
-    path('perfil', views.perfil, name='perfil'),
+    path('perfil/<int:id>', views.perfil, name='perfil'),
 
     path('checar_resposta', views.checar_resposta, name='checar_resposta'),
     path('get_formulario_resposta/<int:id_pergunta>', views.get_formulario_resposta, name='get_formulario_resposta'),
