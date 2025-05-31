@@ -82,9 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'website.wsgi.application'
 
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
