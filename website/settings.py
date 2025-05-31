@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-(2ua1%ji4)&ox^7&09xjbvq(#6)lrtoeu@1(=15xbepxby90!o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'tcc-1-phdm.onrender.com',
+]
 
 
 # Application definition
@@ -80,6 +82,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'website.wsgi.application'
 
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
